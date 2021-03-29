@@ -40,7 +40,7 @@ def find_knight_moves(player_color, position, rank, file):
         if rank-1 >= 0 and cell_have_chessman(oponent_color, position[file-2][rank-1]):
             all_knight_moves.append(current_pos_dig_not*100 + digital_notation(file-2,rank-1))
         if rank + 1 <=7 and  cell_have_chessman(oponent_color, position[file-2][rank+1]):
-             all_knight_moves.append(current_pos_dig_not*100 + digital_notation(file - 2,rank - 1))
+             all_knight_moves.append(current_pos_dig_not*100 + digital_notation(file - 2,rank + 1))
     if file + 2 <=7:
         if rank-1 >= 0 and cell_have_chessman(oponent_color, position[file+2][rank-1]):
             all_knight_moves.append(current_pos_dig_not*100 + digital_notation(file + 2,rank - 1))
@@ -179,7 +179,7 @@ def find_pawn_moves(player_color, position, rank, file):
             all_pawn_moves.append(current_pos_dig_not*1000 + digital_notation(file + player_move_direction,rank)*10 + Knight)
         else:
             all_pawn_moves.append(current_pos_dig_not*100 + digital_notation(file + player_move_direction,rank))
-        if (((int)(4.5 - player_move_direction * 1.5) * player_move_direction > file * player_move_direction ) and # до 3 полосы - два хода пешкой
+        if (((int)(3.5 - player_move_direction * 1.5) * player_move_direction > file * player_move_direction ) and # до 3 полосы - два хода пешкой
         position[file + 2 * player_move_direction][rank] == None): 
             all_pawn_moves.append(current_pos_dig_not*100 + digital_notation(file + 2 * player_move_direction,rank))
     
@@ -256,12 +256,12 @@ def cell_have_chessman(color_char, cell, allow_none = True):
 start_position = [["wR",None,None,None,"wK",None,"wN","wR"],
                     ["wP","wP","wP","wP","wP","wP","wP","wP"],
                     [None,None,None,None,None,None,None,None],
-                    [None,None,None,None,None,None,None,None],
-                    [None,None,None,None,None,None,None,None],
+                    [None,None,None,"bR",None,None,"bQ",None],
+                    [None,"bN",None,None,"bB",None,None,None],
                     [None,None,None,None,None,None,None,None],
                     ["bP","bP","bP","bP","bP","bP","bP","bP"],
                     ["bR","bN","bB","bQ","bK","bB","bN","bR"]
 ]
-result = find_chess_moves(1, start_position)
+result = find_chess_moves(0, start_position)
 print(result)
 print("\n vremya " +(str)(time.time() - tm) )
