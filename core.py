@@ -3,6 +3,7 @@ current_player_color = True
 players_castling = [(True, True), (True, True)]
 stack_position = []
 stack_move = []
+
 def make_move(position, move):
         global stack_position
         global stack_move
@@ -10,6 +11,17 @@ def make_move(position, move):
         global current_player_color
     # Ходы с превращением пешки
     if len(move) > 4:
+        figures = {
+            '1': 'Q',
+            '2': 'R',
+            '3': 'B',
+            '4': 'K'
+        }
+        color_figure = 'w' if current_player_color else 'b'
+        current_position_figure = ((int)(move[1]), (int)(move[0]));
+        next_position_figure = ((int)(move[3]), (int)(move[2]))
+        position[next_position_figure[0]][1] = color_figure + figures[moves[4]]
+        position[current_position_figure[0]][current_position_figure[1]] = None
         return
     # Обычные ходы
     elif len(move) > 3:
@@ -18,9 +30,9 @@ def make_move(position, move):
         stack_move.append(move)
 
         current_position_figure = ((int)(move[1]), (int)(move[0]));
-        next_position_figure = ((int)(move[4]), (int)(move[3]))
-        figure = position[current_position_figure[0][1]] 
-        current_position_figure[0][1] = None
+        next_position_figure = ((int)(move[3]), (int)(move[2]))
+        figure = position[current_position_figure[0][1]]
+        position[current_position_figure[0]][current_position_figure[1]] = None
         position[next_position_figure[0][1]] = figure
        
         # Убираем возможность рокировки
@@ -31,7 +43,6 @@ def make_move(position, move):
         elif (current_position_figure[1] == 0 and current_position_figure[0] == int(7 - 7 * current_player_color )):
             players_castling[current_player_color][1] == False
         
-         current_player_color = !current_player_color
 
         return position
     #Длинная рокировка

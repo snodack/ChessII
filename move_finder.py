@@ -251,6 +251,67 @@ def cell_have_chessman(color_char, cell, allow_none = True):
     elif cell[0] == color_char:
         return True
 
+def check_shah(position, player_color):
+    #Нашли короля
+    player_color =  'w' if player_color else 'b'
+    oponent_color = 'b' if player_color  else 'w'
+    king_position = [0,0]
+    flag_king = False
+    for file in position:
+        for rank in position[file]:
+            if position[file][rank] == player_color + 'K':
+                king_position = [file, rank]
+                flag_king = True
+                break
+        if flag_king:
+            break
+    #Ищем пешки
+    pawn_position = [[1 - 2*player_color, -1],[1 - 2*player_color, 1]
+    for possible_pos in pawn_position:
+        figure_pawn = [king_position[0] + pawn_position[possible_pos][0], king_position[1] + pawn_position[possible_pos][1]]
+        if (0 <=figure_pawn[0] <=7 and 0 <=figure_pawn[1] <=7):
+            if position[figure_pawn[0]][figure_pawn[1]] == oponent_color + 'P':
+                return False
+    #Ищем слонов и ферзя
+    sings = [1,1], [-1,1] [1,-1], [-1,-1]
+    for i in range(len(sings)):
+        for j in range (0,8):
+            figure_pawn = [king_position[0] + j * signs[i][0], king_position[1] + j * signs[i][1]]
+            if (0 <=figure_pawn[0] <=7 and 0 <=figure_pawn[1] <=7):
+            #Черные фигуры
+            if cache_pos == oponent_color + 'B' or cache_pos == oponent_color + 'Q':
+                return False
+            #Пусто
+            elif cache_pos[0] == None:
+                continue
+            #Белые фигуры
+            else:
+                break
+    #Ищем ладью  и ферзя
+    sings = [1,0], [-1,0] [0,-1], [0,1]
+    for i in range(len(sings)):
+        for j in range (0,8):
+            figure_pawn = [king_position[0] + j * signs[i][0], king_position[1] + j * signs[i][1]]
+            if (0 <=figure_pawn[0] <=7 and 0 <=figure_pawn[1] <=7):
+            #Черные фигуры
+            if cache_pos == oponent_color + 'R' or cache_pos == oponent_color + 'Q':
+                return False
+            #Пусто
+            elif cache_pos[0] == None:
+                continue
+            #Белые фигуры
+            else:
+                break
+    #Ищем Конь
+    signs = [[-2, -1], [-2, 1], [2, -1], [2, 1], [-1, 2], [1, 2], [-1, -2], [1, -2]]
+    for i in signs:
+        figure_pawn = [king_position[0] + i[0], king_position[1] + i[1]]
+        if (0 <=figure_pawn[0] <=7 and 0 <=figure_pawn[1] <=7):
+        if cache_pos == oponent_color + 'N':
+            return False
+    return True
+
+
 
 
 start_position = [["wR",None,None,None,"wK",None,"wN","wR"],
