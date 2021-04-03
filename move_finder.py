@@ -234,10 +234,6 @@ def find_king_moves(player_color, position, rank, file, castling_data):
 
     return all_king_moves
 
-
-    
-    
-
 #цифровая нотация
 def digital_notation(cell_file, cell_rank):
     return (str)(cell_rank) +(str)(cell_file)
@@ -323,6 +319,6 @@ start_position = [["wR",None,None,None,"wK",None,"wN","wR"],
                     ["bP","bP","bP","bP","bP","bP","bP","bP"],
                     ["bR","bN","bB","bQ","bK","bB","bN","bR"]
 ]
-result = find_chess_moves(1, start_position)
-print(result)
-print("\n vremya " +(str)(time.time() - tm) )
+#result = find_chess_moves(1, start_position)
+#print(result)
+#print("\n vremya " +(str)(time.time() - tm) )
