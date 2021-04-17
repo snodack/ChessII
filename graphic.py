@@ -14,7 +14,7 @@ screen = pygame.display.set_mode(size)
 
 current_player_color = True
 current_position = []
-curent_available_moves = []
+current_available_moves = []
 ranks = ['A','B','C','D','E','F','G','H']
 files = [i for i in range(1,9)]
 
@@ -83,7 +83,7 @@ def draw_board(player_color = 1, dedicated_cell = None):
 
 def drawchessman(position, player_color, avaiable_moves):
     global current_player_color
-    global curent_available_moves
+    global current_available_moves
     current_player_color = player_color
     if player_color:
         for i in range(8):
@@ -113,14 +113,25 @@ def drawchessman(position, player_color, avaiable_moves):
 def handle_click(pos):
     #отметить зеленым если фигура ваша
     rank_file = ((int)(pos[0]/cell_size), (int)(pos[1]/cell_size))
-    draw_board(current_player_color, rank_file)
-    #Отрисовка доступных ходов
-    drawchessman(current_position,current_player_color, [])
+    #на случай тыканья за пределы клеток
+    if rank_file > (7,7): 
+        return
+
+    color_figure = 'w' if current_player_color else 'b'
+    fig = current_position[rank_file[1]][rank_file[0]]
+    if fig != None and fig[0] == color_figure:
+        draw_board(current_player_color, rank_file)
+        #Отрисовка доступных ходов
+        drawchessman(current_position,current_player_color, [])
+        #Отобразить ходы
+
 
 #Функция отрисовки
 def draw(position, player_color, avaiable_moves):
+    global current_position
+    current_position = position
     draw_board(player_color)
-    drawchessman(position, player_color, avaiable_moves)
+    drawchessman(current_position, player_color, avaiable_moves)
     
 async def input_check():
     while 1:
@@ -138,5 +149,3 @@ start_position = [["bR","bN","bB","bQ","bK","bB","bN","bR"],
                     ["wP","wP","wP","wP","wP","wP","wP","wP"],
                     ["wR","wN","wB","wQ","wK","wB","wN","wR"]
 ]
-
-   
