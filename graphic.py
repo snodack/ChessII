@@ -10,11 +10,13 @@ tips_color = pygame.Color(80,80,80)
 size = width, height = 900, 640
 chess_board_size = 640
 cell_size = chess_board_size / 8
+cell_move_radius = cell_size/4
 screen = pygame.display.set_mode(size)
 
 current_player_color = True
-current_position = []
-current_available_moves = []
+current_position = [] 
+current_available_moves = []#Доступные ходы
+current_available_cells = [] #Доступные точки нужны для отображения
 ranks = ['A','B','C','D','E','F','G','H']
 files = [i for i in range(1,9)]
 
@@ -83,7 +85,6 @@ def draw_board(player_color = 1, dedicated_cell = None):
 
 def drawchessman(position, player_color, avaiable_moves):
     global current_player_color
-    global current_available_moves
     current_player_color = player_color
     if player_color:
         for i in range(8):
@@ -109,6 +110,17 @@ def drawchessman(position, player_color, avaiable_moves):
                     cell_size))
     pygame.display.flip()
     return
+    
+#отрисовка ходов
+def draw_figure_moves():
+    for i in current_available_cells:
+        pygame.draw.circle(screen, green_color, (i[0] * cell_size + cell_size/2, i[1]*cell_size +cell_size/2), cell_move_radius, width = 0)
+    pygame.display.flip()
+
+def show_moves(rank_file):
+    global current_available_cells
+    current_available_cells = [((int)(i[2]),(int)(i[3])) for i in current_available_moves if (int)(i[0]) == rank_file[0] and (int)(i[1]) == rank_file[1]]
+    draw_figure_moves()
 
 def handle_click(pos):
     #отметить зеленым если фигура ваша
@@ -124,14 +136,17 @@ def handle_click(pos):
         #Отрисовка доступных ходов
         drawchessman(current_position,current_player_color, [])
         #Отобразить ходы
+        show_moves(rank_file)
 
 
 #Функция отрисовки
 def draw(position, player_color, avaiable_moves):
     global current_position
+    global current_available_moves
+    current_available_moves = avaiable_moves
     current_position = position
     draw_board(player_color)
-    drawchessman(current_position, player_color, avaiable_moves)
+    drawchessman(current_position, player_color, current_available_moves)
     
 async def input_check():
     while 1:
