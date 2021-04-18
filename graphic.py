@@ -105,12 +105,12 @@ def drawchessman(position, player_color):
 #отрисовка ходов
 def draw_figure_moves():
     for i in current_available_cells:
-        pygame.draw.circle(screen, green_color, (i[0] * cell_size + cell_size/2, i[1]*cell_size +cell_size/2), cell_move_radius, width = 0)
+        pygame.draw.circle(screen, green_color, ((int)(i[2]) * cell_size + cell_size/2, (int)(i[3])*cell_size +cell_size/2), cell_move_radius, width = 0)
     pygame.display.flip()
 
 def show_moves(rank_file):
     global current_available_cells
-    current_available_cells = [((int)(i[2]),(int)(i[3])) for i in current_available_moves if (int)(i[0]) == rank_file[0] and (int)(i[1]) == rank_file[1]]
+    current_available_cells = [i for i in current_available_moves if (int)(i[0]) == rank_file[0] and (int)(i[1]) == rank_file[1]]
     draw_figure_moves()
 
 def handle_click(pos):
@@ -173,12 +173,17 @@ class default_state(state):
 
 class figure_state(state):
     def process(self, position, rank_file):
-        # Обработка нажатия
+        # Обработка нажатия на клетку
+        for i in current_available_cells: 
         # Если выбран доступный ход - его выполнение(передача в core)
-            # Переход к состоянию enemy_state
-        # Иначе если выбрана другая своя фигура - return
-        # Иначе - другая клетка вражеская или она 
-            # None - переход в default_state
+            if (int)(i[2]) == rank_file[0] and (int)(i[3]) == rank_file[1]:
+                # Передать ход в core
+                # Переход к состоянию enemy_state
+                current_state = enemy_state()
+                return
+        # Иначе - переход в default_state
+        current_state =  default_state()
+        current_state.process(position, rank_file)
         
         pass
 

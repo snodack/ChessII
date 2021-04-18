@@ -107,7 +107,6 @@ def start(position, player_color):
     gc.draw(position, player_color, possible_moves)
     loop = asyncio.get_event_loop()
     loop.run_until_complete(gc.input_check())
-    print('hi')
 start(start_position, current_player_color)
 
 
