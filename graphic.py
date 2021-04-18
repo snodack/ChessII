@@ -1,7 +1,6 @@
 import sys, pygame
 import asyncio
 from abc import ABC, abstractmethod
-from __future__ import annotations
 
 #Глобальные
 pygame.init()
@@ -18,7 +17,7 @@ screen = pygame.display.set_mode(size)
 
 current_player_color = True
 current_position = [] 
-current_state = default_state() # Хранит текущее состояние
+current_state =  None # Хранит текущее состояние
 current_available_moves = [] #Доступные ходы
 current_available_cells = [] #Доступные точки нужны для отображения
 ranks = ['A','B','C','D','E','F','G','H']
@@ -127,6 +126,8 @@ def handle_click(pos):
 def draw(position, player_color, avaiable_moves):
     global current_position
     global current_available_moves
+    global current_state
+    current_state = default_state()
     current_available_moves = avaiable_moves
     current_position = position
     draw_board(player_color)
@@ -148,14 +149,8 @@ start_position = [["bR","bN","bB","bQ","bK","bB","bN","bR"],
                     ["wP","wP","wP","wP","wP","wP","wP","wP"],
                     ["wR","wN","wB","wQ","wK","wB","wN","wR"]
 ]
-# Функция перехода в другое состояние
-def transition_to(new_state: state):
-    global current_state
-    current_state = state
-
 # Абстрактный класс для состояния
 class state(ABC):
-    @abstractmethod
     def process(self, position, rank_file):
         pass
 
@@ -173,7 +168,7 @@ class default_state(state):
             show_moves(rank_file)
             # Переход к состоянию figure_state
             transition_to(figure_state())
-            
+
         pass
 
 class figure_state(state):
@@ -192,3 +187,8 @@ class enemy_state(state):
         # Обработка нажатия - не происходит
         # Предопределение ходов в будущем
         pass
+
+# Функция перехода в другое состояние
+def transition_to(new_state: state):
+    global current_state
+    current_state = new_state

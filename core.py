@@ -3,7 +3,7 @@ import graphic as gc
 import copy
 import asyncio
 #на вход нейронке будем падавать транспонированную матрицу позиции из-за rank
-current_player_color = False
+current_player_color = True
 players_castling = [(True, True), (True, True)]
 stack_position = []
 stack_move = []
