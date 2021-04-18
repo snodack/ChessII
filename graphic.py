@@ -83,34 +83,22 @@ def draw_board(player_color = 1, dedicated_cell = None):
         
     pygame.display.flip()
 
-def drawchessman(position, player_color, avaiable_moves):
+def drawchessman(position, player_color):
     global current_player_color
     current_player_color = player_color
-    if player_color:
-        for i in range(8):
-            for j in range(8):
-                pos_figure = position[i][j]
-                if pos_figure != None:
-                    fig = chessmen[pos_figure]
-                    screen.blit(fig, pygame.Rect(
-                    j*cell_size,
-                    i*cell_size,
-                    cell_size,
-                    cell_size))
-    else:
-        for i in range(8):
-            for j in range(8):
-                pos_figure = position[i][j]
-                if pos_figure != None:
-                    fig = chessmen[pos_figure]
-                    screen.blit(fig, pygame.Rect(
-                    (7-j)*cell_size,
-                    (7-i)*cell_size,
-                    cell_size,
-                    cell_size))
+    for i in range(8):
+        for j in range(8):
+            pos_figure = position[i][j]
+            if pos_figure != None:
+                fig = chessmen[pos_figure]
+                screen.blit(fig, pygame.Rect(
+                j*cell_size,
+                i*cell_size,
+                cell_size,
+                cell_size))
     pygame.display.flip()
     return
-    
+
 #отрисовка ходов
 def draw_figure_moves():
     for i in current_available_cells:
@@ -125,7 +113,7 @@ def show_moves(rank_file):
 def handle_click(pos):
     #отметить зеленым если фигура ваша
     rank_file = ((int)(pos[0]/cell_size), (int)(pos[1]/cell_size))
-    #на случай тыканья за пределы клеток
+    #на случай нажатия за пределы клеток
     if rank_file > (7,7): 
         return
 
@@ -133,8 +121,7 @@ def handle_click(pos):
     fig = current_position[rank_file[1]][rank_file[0]]
     if fig != None and fig[0] == color_figure:
         draw_board(current_player_color, rank_file)
-        #Отрисовка доступных ходов
-        drawchessman(current_position,current_player_color, [])
+        drawchessman(current_position,current_player_color)
         #Отобразить ходы
         show_moves(rank_file)
 
@@ -146,7 +133,7 @@ def draw(position, player_color, avaiable_moves):
     current_available_moves = avaiable_moves
     current_position = position
     draw_board(player_color)
-    drawchessman(current_position, player_color, current_available_moves)
+    drawchessman(current_position, player_color)
     
 async def input_check():
     while 1:
