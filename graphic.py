@@ -1,5 +1,8 @@
 import sys, pygame
 import asyncio
+from abc import ABC, abstractmethod
+from __future__ import annotations
+
 #Глобальные
 pygame.init()
 show_tips = True
@@ -15,7 +18,8 @@ screen = pygame.display.set_mode(size)
 
 current_player_color = True
 current_position = [] 
-current_available_moves = []#Доступные ходы
+current_state = default_state() # Хранит текущее состояние
+current_available_moves = [] #Доступные ходы
 current_available_cells = [] #Доступные точки нужны для отображения
 ranks = ['A','B','C','D','E','F','G','H']
 files = [i for i in range(1,9)]
@@ -116,14 +120,7 @@ def handle_click(pos):
     #на случай нажатия за пределы клеток
     if rank_file > (7,7): 
         return
-
-    color_figure = 'w' if current_player_color else 'b'
-    fig = current_position[rank_file[1]][rank_file[0]]
-    if fig != None and fig[0] == color_figure:
-        draw_board(current_player_color, rank_file)
-        drawchessman(current_position,current_player_color)
-        #Отобразить ходы
-        show_moves(rank_file)
+    current_state.process(current_position, rank_file)
 
 
 #Функция отрисовки
@@ -151,3 +148,47 @@ start_position = [["bR","bN","bB","bQ","bK","bB","bN","bR"],
                     ["wP","wP","wP","wP","wP","wP","wP","wP"],
                     ["wR","wN","wB","wQ","wK","wB","wN","wR"]
 ]
+# Функция перехода в другое состояние
+def transition_to(new_state: state):
+    global current_state
+    current_state = state
+
+# Абстрактный класс для состояния
+class state(ABC):
+    @abstractmethod
+    def process(self, position, rank_file):
+        pass
+
+# Класс обычного состояния
+class default_state(state):
+    def process(self, position, rank_file):
+        # Обработка нажатия на клетку
+        color_figure = 'w' if current_player_color else 'b'
+        fig = current_position[rank_file[1]][rank_file[0]]
+        if fig != None and fig[0] == color_figure:
+
+            draw_board(current_player_color, rank_file)
+            drawchessman(current_position,current_player_color)
+            # Показ доступных ходов
+            show_moves(rank_file)
+            # Переход к состоянию figure_state
+            transition_to(figure_state())
+            
+        pass
+
+class figure_state(state):
+    def process(self, position, rank_file):
+        # Обработка нажатия
+        # Если выбран доступный ход - его выполнение(передача в core)
+            # Переход к состоянию enemy_state
+        # Иначе если выбрана другая своя фигура - return
+        # Иначе - другая клетка вражеская или она 
+            # None - переход в default_state
+        
+        pass
+
+class enemy_state(state):
+    def process(self, position, rank_file):
+        # Обработка нажатия - не происходит
+        # Предопределение ходов в будущем
+        pass
