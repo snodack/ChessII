@@ -23,6 +23,7 @@ current_available_cells = [] #Доступные точки нужны для о
 ranks = ['A','B','C','D','E','F','G','H']
 files = [i for i in range(1,9)]
 
+current_context = None #Для обратной связи
 font_size = 20
 font = pygame.font.SysFont('didot.ttc', font_size)
 
@@ -176,10 +177,12 @@ class figure_state(state):
         # Обработка нажатия на клетку
         for i in current_available_cells: 
         # Если выбран доступный ход - его выполнение(передача в core)
+        # Нужно полностью находить ход
             if (int)(i[2]) == rank_file[0] and (int)(i[3]) == rank_file[1]:
                 # Передать ход в core
+                current_context.core_context.player_make_move(i)
                 # Переход к состоянию enemy_state
-                current_state = enemy_state()
+                transition_to(enemy_state())
                 return
         # Иначе - переход в default_state
         current_state =  default_state()
@@ -193,7 +196,12 @@ class enemy_state(state):
         # Предопределение ходов в будущем
         pass
 
+class graphic_context():
+    def init(self, core_context):
+        self.core_context = core_context
+
 # Функция перехода в другое состояние
 def transition_to(new_state: state):
     global current_state
     current_state = new_state
+

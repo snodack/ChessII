@@ -99,12 +99,20 @@ def find_moves(position):
              possible_moves.append(i)
     return possible_moves
     
+def player_make_move(move):
+    global global_position
+    global players_castling
+    global_position, players_castling[current_player_color] = make_move(global_position, move)
+    gc.draw(position, current_player_color, possible_moves)
+
+
 def start(position, player_color):
     global current_player_color
     position = position
     current_player_color = player_color
     possible_moves = find_moves(position)
     gc.draw(position, player_color, possible_moves)
+    gc.current_context = gc.context(self)
     loop = asyncio.get_event_loop()
     loop.run_until_complete(gc.input_check())
 start(start_position, current_player_color)
