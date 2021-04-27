@@ -237,7 +237,7 @@ def find_king_moves(player_color, position, rank, file, castling_data):
 
 #цифровая нотация
 def digital_notation(cell_file, cell_rank):
-    return (str)(cell_rank) +(str)(cell_file)
+    return  (str)(cell_file) + (str)(cell_rank)
 
 def cell_have_chessman(color_char, cell, allow_none = True):
     if cell == None:

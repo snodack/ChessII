@@ -59,8 +59,8 @@ def draw_board(player_color = 1, dedicated_cell = None):
     if dedicated_cell:
         pygame.draw.rect(screen,
         green_color,                          
-        pygame.Rect(cell_size * dedicated_cell[0],
-                                            cell_size * dedicated_cell[1], 
+        pygame.Rect(cell_size * dedicated_cell[1],
+                                            cell_size * dedicated_cell[0], 
                                             cell_size,
                                             cell_size,
                                             width = 1,))
@@ -108,22 +108,22 @@ def drawchessman(position, player_color):
 #отрисовка ходов
 def draw_figure_moves():
     for i in current_available_cells:
-        pygame.draw.circle(screen, green_color, ((int)(i[2]) * cell_size + cell_size/2, (int)(i[3])*cell_size +cell_size/2), cell_move_radius, width = 0)
+        pygame.draw.circle(screen, green_color, ((int)(i[3]) * cell_size + cell_size/2, (int)(i[2])*cell_size +cell_size/2), cell_move_radius, width = 0)
     pygame.display.flip()
 
-def show_moves(rank_file):
+def show_moves(file_rank):
     global current_available_cells
     #обычные фигуры 
-    current_available_cells = [i for i in current_available_moves if (int)(i[0]) == rank_file[0] and (int)(i[1]) == rank_file[1]]
+    current_available_cells = [i for i in current_available_moves if (int)(i[0]) == file_rank[0] and (int)(i[1]) == file_rank[1]]
     draw_figure_moves()
 
 def handle_click(pos):
     #отметить зеленым если фигура ваша
-    rank_file = ((int)(pos[0]/cell_size), (int)(pos[1]/cell_size))
+    file_rank = ((int)(pos[1]/cell_size), (int)(pos[0]/cell_size))
     #на случай нажатия за пределы клеток
-    if rank_file > (7,7): 
+    if file_rank > (7,7): 
         return
-    current_state.process(current_position, rank_file)
+    current_state.process(current_position, file_rank)
 
 
 #Функция отрисовки
@@ -155,33 +155,33 @@ start_position = [["bR","bN","bB","bQ","bK","bB","bN","bR"],
 ]
 # Абстрактный класс для состояния
 class state(ABC):
-    def process(self, position, rank_file):
+    def process(self, position, file_rank):
         pass
 
 # Класс обычного состояния
 class default_state(state):
-    def process(self, position, rank_file):
+    def process(self, position, file_rank):
         # Обработка нажатия на клетку
         color_figure = 'w' if current_player_color else 'b'
-        fig = current_position[rank_file[1]][rank_file[0]]
+        fig = current_position[file_rank[0]][file_rank[1]]
         if fig != None and fig[0] == color_figure:
 
-            draw_board(current_player_color, rank_file)
+            draw_board(current_player_color, file_rank)
             drawchessman(current_position,current_player_color)
             # Показ доступных ходов
-            show_moves(rank_file)
+            show_moves(file_rank)
             # Переход к состоянию figure_state
             transition_to(figure_state())
 
         pass
 
 class figure_state(state):
-    def process(self, position, rank_file):
+    def process(self, position, file_rank):
         # Обработка нажатия на клетку
         for i in current_available_cells: 
         # Если выбран доступный ход - его выполнение(передача в core)
         # Нужно полностью находить ход
-            if (int)(i[2]) == rank_file[0] and (int)(i[3]) == rank_file[1]:
+            if (int)(i[2]) == file_rank[0] and (int)(i[3]) == file_rank[1]:
                 # Передать ход в core
                 current_context.core.player_make_move(i)
                 # Переход к состоянию enemy_state
@@ -192,12 +192,12 @@ class figure_state(state):
                 return
         # Иначе - переход в default_state
         current_state =  default_state()
-        current_state.process(position, rank_file)
+        current_state.process(position, file_rank)
         
         pass
 
 class enemy_state(state):
-    def process(self, position, rank_file):
+    def process(self, position, file_rank):
         # Обработка нажатия - не происходит
         # Предопределение ходов в будущем
         pass

@@ -34,17 +34,17 @@ def make_move(global_position, move):
             '3': 'B',
             '4': 'K'
         }
-        current_position_figure = ((int)(move[1]), (int)(move[0]));
-        next_position_figure = ((int)(move[3]), (int)(move[2]))
+        current_position_figure = ((int)(move[0]), (int)(move[1]));
+        next_position_figure = ((int)(move[2]), (int)(move[3]))
         position[next_position_figure[0]][1] = color_figure + figures[moves[4]]
         position[current_position_figure[0]][current_position_figure[1]] = None
     # Обычные ходы "2233"
     elif len(move) > 3:
         #Разбираем ход
         #Позиция фигуры до хода
-        current_position_figure = ((int)(move[1]), (int)(move[0]));
+        current_position_figure = ((int)(move[0]), (int)(move[1]));
         #Позиция фигуры после хода
-        next_position_figure = ((int)(move[3]), (int)(move[2]))
+        next_position_figure = ((int)(move[2]), (int)(move[3]))
         figure, position[current_position_figure[0]][current_position_figure[1]] = position[current_position_figure[0]][current_position_figure[1]], None
         position[next_position_figure[0]][next_position_figure[1]] = figure
         # Убираем возможность рокировки, при движении короля
