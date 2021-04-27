@@ -3,7 +3,7 @@
 # для этого ходп(пригодиться для рокировки и апргейда пешек). Также там можно иметь функцию преобразования 
 # в книжный вид для отображения истории игры
 class CMove:
-    def __init__(self, player_color ,file_rank_from = None file_rank_to = None):
+    def __init__(self, player_color ,file_rank_from, file_rank_to = None):
         self.cell_from = file_rank_from
         self.cell_to = file_rank_to
         self.player_color = player_color
@@ -24,9 +24,10 @@ class CMove:
         else:
             return (str)(7-7*(not self.player_color)) + '6'
 
-    def get_move:
-        if cell_from == None:
+    def get_move(self):
+        if self.cell_from == None:
             return self.cell_to
         else:
             return self.cell_to + self.cell_from
-
+start = CMove(True, "01","03")
+print(start)

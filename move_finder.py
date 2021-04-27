@@ -1,5 +1,6 @@
 #Нахождение всех ходов в циврофой нотации
 import time
+import move_class as mc
 King = '5' 
 Queen = '1' # вроде работает
 Rook = '2' # вроде работает
