@@ -7,7 +7,7 @@ current_player_color = True
 players_castling = [(True, True), (True, True)]
 stack_position = []
 stack_move = []
-start_position = [["bR","bN","bB","bQ","bK","bB","bN","bR"],
+global_position = [["bR","bN","bB","bQ","bK","bB","bN","bR"],
                     ["bP","bP","bP","bP","bP","bP","bP","bP"],
                     [None,None,None,None,None,None,None,None],
                     [None,None,None,None,None,None,None,None],
@@ -16,7 +16,11 @@ start_position = [["bR","bN","bB","bQ","bK","bB","bN","bR"],
                     ["wP","wP","wP","wP","wP","wP","wP","wP"],
                     ["wR","wN","wB","wQ","wK","wB","wN","wR"]
 ]
-global_position = []
+
+class core_context():
+    def player_make_move(self, move):
+        player_make_move(move)
+
 
 def make_move(global_position, move):
     position = copy.deepcopy(global_position) #копия глобальной позиции - дабы не портить основу
@@ -40,8 +44,8 @@ def make_move(global_position, move):
         current_position_figure = ((int)(move[1]), (int)(move[0]));
         #Позиция фигуры после хода
         next_position_figure = ((int)(move[3]), (int)(move[2]))
-        figure, position[current_position_figure[1]][current_position_figure[0]] = position[current_position_figure[0]][current_position_figure[1]], None
-        position[next_position_figure[0]][1] = color_figure + figure
+        figure, position[current_position_figure[0]][current_position_figure[1]] = position[current_position_figure[0]][current_position_figure[1]], None
+        position[next_position_figure[0]][next_position_figure[1]] = figure
         # Убираем возможность рокировки, при движении короля
         if figure[1] == 'K':
             players_castling[current_player_color] = (False, False)
@@ -102,8 +106,10 @@ def find_moves(position):
 def player_make_move(move):
     global global_position
     global players_castling
+    global current_player_color
     global_position, players_castling[current_player_color] = make_move(global_position, move)
-    gc.draw(position, current_player_color, possible_moves)
+    current_player_color = not current_player_color
+    gc.draw(global_position, current_player_color, find_moves(global_position))
 
 
 def start(position, player_color):
@@ -112,10 +118,10 @@ def start(position, player_color):
     current_player_color = player_color
     possible_moves = find_moves(position)
     gc.draw(position, player_color, possible_moves)
-    gc.current_context = gc.context(self)
+    gc.init_context(core_context())
     loop = asyncio.get_event_loop()
     loop.run_until_complete(gc.input_check())
-start(start_position, current_player_color)
+start(global_position, current_player_color)
 
 
 

@@ -9,6 +9,7 @@ white_color = pygame.Color(255,255,255)
 black_color = pygame.Color(65,25,0)
 green_color = pygame.Color(0,255,0)
 tips_color = pygame.Color(80,80,80)
+debug_mode = True # Позволяет играть самим с собой
 size = width, height = 900, 640
 chess_board_size = 640
 cell_size = chess_board_size / 8
@@ -44,6 +45,7 @@ chessmen = {
 }
 #Рисуем доску и подсказки
 def draw_board(player_color = 1, dedicated_cell = None):
+    player_color = 1
     screen.fill(pygame.Color(0,0,0))
     #Нарисование доски
     for rank in range(1,9):
@@ -180,9 +182,12 @@ class figure_state(state):
         # Нужно полностью находить ход
             if (int)(i[2]) == rank_file[0] and (int)(i[3]) == rank_file[1]:
                 # Передать ход в core
-                current_context.core_context.player_make_move(i)
+                current_context.core.player_make_move(i)
                 # Переход к состоянию enemy_state
-                transition_to(enemy_state())
+                if debug_mode:
+                    transition_to(default_state())
+                else:
+                    transition_to(enemy_state())
                 return
         # Иначе - переход в default_state
         current_state =  default_state()
@@ -197,9 +202,12 @@ class enemy_state(state):
         pass
 
 class graphic_context():
-    def init(self, core_context):
-        self.core_context = core_context
+    def __init__(self, core_context):
+        self.core = core_context
 
+def init_context(core_context):
+    global current_context
+    current_context = graphic_context(core_context)
 # Функция перехода в другое состояние
 def transition_to(new_state: state):
     global current_state

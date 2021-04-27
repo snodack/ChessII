@@ -271,7 +271,7 @@ def check_shah(position, player_color):
     #Ищем слонов и ферзя
     signs = [[1,1], [-1,1], [1,-1], [-1,-1]]
     for i in range(len(signs)):
-        for j in range (0,8):
+        for j in range (1,8):
             figure_posit = [king_position[0] + j * signs[i][0], king_position[1] + j * signs[i][1]]
             if (0 <=figure_posit[0] <=7 and 0 <=figure_posit[1] <=7):
                 cache_pos = position[figure_posit[0]][figure_posit[1]]
@@ -279,15 +279,18 @@ def check_shah(position, player_color):
                 if cache_pos == oponent_color_char + 'B' or cache_pos == oponent_color_char + 'Q':
                     return False
                 #Пусто
-                elif cache_pos[0] == None:
+                elif cache_pos == None:
                     continue
                 #Белые фигуры
                 else:
                     break
+            else:
+                break
+
     #Ищем ладью  и ферзя
     signs = [[1,0], [-1,0], [0,-1], [0,1]]
     for i in range(len(signs)):
-        for j in range (0,8):
+        for j in range (1,8):
             figure_posit = [king_position[0] + j * signs[i][0], king_position[1] + j * signs[i][1]]
             if (0 <=figure_posit[0] <=7 and 0 <=figure_posit[1] <=7):
                 cache_pos = position[figure_posit[0]][figure_posit[1]]
@@ -295,7 +298,7 @@ def check_shah(position, player_color):
                 if cache_pos == oponent_color_char + 'R' or cache_pos == oponent_color_char + 'Q':
                     return False
                 #Пусто
-                elif cache_pos[0] == None:
+                elif cache_pos == None:
                     continue
                 #Белые фигуры
                 else:
