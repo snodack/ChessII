@@ -220,6 +220,7 @@ def find_king_moves(player_color, position, rank, file, castling_data):
                 all_king_moves.append(current_pos_dig_not + digital_notation(file + moves[0], rank + moves[1]))
     #Рокировка
     #Короткая 0-0
+    #Проверка на позицию короля - не нужна, так как передвижение короля, шахи и т.д учитывает castling_data
     if (castling_data[0] and
         position[file][rank + 1] == None and
         position[file][rank + 2] == None):

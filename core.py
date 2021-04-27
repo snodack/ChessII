@@ -24,6 +24,7 @@ class core_context():
 
 def make_move(global_position, move):
     position = copy.deepcopy(global_position) #копия глобальной позиции - дабы не портить основу
+    castling = copy.deepcopy(players_castling)
     color_figure = 'w' if current_player_color else 'b'
     # Ходы с превращением пешки
     if len(move) > 4:
@@ -48,13 +49,13 @@ def make_move(global_position, move):
         position[next_position_figure[0]][next_position_figure[1]] = figure
         # Убираем возможность рокировки, при движении короля
         if figure[1] == 'K':
-            players_castling[current_player_color] = (False, False)
+            castling[current_player_color] = (False, False)
         # Движение Ладьи справа(сбивает рокировки)
         if (current_position_figure[1] == 7 and current_position_figure[0] == int(7 - 7 * current_player_color )):
-            players_castling[current_player_color][0] == False
+            castling[current_player_color][0] == False
         # Движение Ладьи слева(сбивает рокировки)
         elif (current_position_figure[1] == 0 and current_position_figure[0] == int(7 - 7 * current_player_color )):
-            players_castling[current_player_color][1] == False
+            castling[current_player_color][1] == False
         
     #Длинная рокировка "000"
     elif len(move) > 2:
@@ -67,12 +68,14 @@ def make_move(global_position, move):
         king_file = (int)(7 - 7 * current_player_color)
         position[king_file][4], position[king_file][6] = None , position[king_file][4]
         position[king_file][5], position[king_file][7] = position[king_file][7], None
-    return (position, players_castling)
+    return (position, castling)
 
-def check_castling_shah(position, player_color, long_castling):
+def check_castling_shah(check_position, player_color, long_castling):
+    position = copy.deepcopy(check_position)
+    #Если король под шахом ->выход
     if not mf.check_shah(position, player_color):
         return False
-    king_file = (int)(7 - 7 * current_player_color)
+    king_file = (int)(7 - 7 * (not current_player_color))
     position[king_file][4], position[king_file][5 - 2 * long_castling] = None , position[king_file][4]
     if not mf.check_shah(position, player_color):
         return False
@@ -93,9 +96,11 @@ def find_moves(position):
         #Рокировка
         if len(i)<4:
             if len(i)> 2:
+                #Длинная рокировка
                 move_check_result = check_castling_shah(position,current_player_color, True)
             else:
-                move_check_result = check_castling_shah(position,current_player_color, True)
+                #Коротка рокировка
+                move_check_result = check_castling_shah(position,current_player_color, False)
         else:
             move_next_position = make_move(position, i)[0]
             move_check_result =  mf.check_shah(move_next_position, current_player_color)
@@ -107,7 +112,7 @@ def player_make_move(move):
     global global_position
     global players_castling
     global current_player_color
-    global_position, players_castling[current_player_color] = make_move(global_position, move)
+    global_position, players_castling = make_move(global_position, move)
     current_player_color = not current_player_color
     gc.draw(global_position, current_player_color, find_moves(global_position))
 

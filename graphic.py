@@ -113,6 +113,7 @@ def draw_figure_moves():
 
 def show_moves(rank_file):
     global current_available_cells
+    #обычные фигуры 
     current_available_cells = [i for i in current_available_moves if (int)(i[0]) == rank_file[0] and (int)(i[1]) == rank_file[1]]
     draw_figure_moves()
 
