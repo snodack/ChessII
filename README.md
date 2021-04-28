@@ -1,3 +1,3 @@
 # ChessII
 
-![til](./gifs/28_04.gif)
+![til](./gifs/29_04.gif)

@@ -22,7 +22,8 @@ class core_context():
         player_make_move(move)
 
 
-def make_move(global_position, move):
+def make_move(global_position, i_move):
+    move = i_move.get_move()
     position = copy.deepcopy(global_position) #копия глобальной позиции - дабы не портить основу
     castling = copy.deepcopy(players_castling)
     color_figure = 'w' if current_player_color else 'b'
@@ -59,15 +60,17 @@ def make_move(global_position, move):
         
     #Длинная рокировка "000"
     elif len(move) > 2:
-        king_file = (int)(7 - 7 * current_player_color)
+        king_file = (int)(7 - 7 * (not current_player_color))
         #Проверяем нет ли шахов по пути на рокировку
         position[king_file][4], position[king_file][2] = None , position[king_file][4]
-        position[king_file][3], position[king_file][1] = position[king_file][7], None
+        position[king_file][3], position[king_file][0] = position[king_file][7], None
+        castling[current_player_color] = (False, False)
     #Короткая рокировка "00"
     else:
-        king_file = (int)(7 - 7 * current_player_color)
+        king_file = (int)(7 - 7 * (not current_player_color))
         position[king_file][4], position[king_file][6] = None , position[king_file][4]
         position[king_file][5], position[king_file][7] = position[king_file][7], None
+        castling[current_player_color] = (False, False)
     return (position, castling)
 
 def check_castling_shah(check_position, player_color, long_castling):
@@ -92,10 +95,11 @@ def find_moves(position):
     #Необходимо проверить их
     move_next_position = None
     for i in move_wcbs:
+        i_move = i.get_move()
         move_check_result = False
         #Рокировка
-        if len(i)<4:
-            if len(i)> 2:
+        if len(i_move)<4:
+            if len(i_move)> 2:
                 #Длинная рокировка
                 move_check_result = check_castling_shah(position,current_player_color, True)
             else:
@@ -106,6 +110,10 @@ def find_moves(position):
             move_check_result =  mf.check_shah(move_next_position, current_player_color)
         if move_check_result:
              possible_moves.append(i)
+    if possible_moves == []:
+        if not mf.check_shah(move_next_position, current_player_color):
+            color = "white" if current_player_color else "black"
+            print(color + " lose!")
     return possible_moves
     
 def player_make_move(move):

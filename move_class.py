@@ -9,25 +9,23 @@ class CMove:
         self.player_color = player_color
     def get_from(self):
         #Не рокировка
-        if cell_to != None:
+        if self.cell_to != None:
             return self.cell_from
         else:
             return (str)(7-7*(not self.player_color)) + '4'
     def get_to(self):
         #Не рокировка
-        if cell_to != None:
+        if self.cell_to != None:
             return self.cell_to
         #Длинная
-        elif cell_from > 2:
+        elif len(self.cell_from) > 2:
             return (str)(7-7*(not self.player_color)) + '2'
         #Короткая
         else:
             return (str)(7-7*(not self.player_color)) + '6'
 
     def get_move(self):
-        if self.cell_from == None:
-            return self.cell_to
+        if self.cell_to == None:
+            return self.cell_from
         else:
-            return self.cell_to + self.cell_from
-start = CMove(True, "01","03")
-print(start)
+            return self.cell_from + self.cell_to

@@ -108,20 +108,20 @@ def drawchessman(position, player_color):
 #отрисовка ходов
 def draw_figure_moves():
     for i in current_available_cells:
-        pygame.draw.circle(screen, green_color, ((int)(i[3]) * cell_size + cell_size/2, (int)(i[2])*cell_size +cell_size/2), cell_move_radius, width = 0)
+        pygame.draw.circle(screen, green_color, ((int)(i.get_to()[1]) * cell_size + cell_size/2, (int)(i.get_to()[0])*cell_size +cell_size/2), cell_move_radius, width = 0)
     pygame.display.flip()
 
 def show_moves(file_rank):
     global current_available_cells
     #обычные фигуры 
-    current_available_cells = [i for i in current_available_moves if (int)(i[0]) == file_rank[0] and (int)(i[1]) == file_rank[1]]
+    current_available_cells = [i for i in current_available_moves if (int)(i.get_from()[0]) == file_rank[0] and (int)(i.get_from()[1]) == file_rank[1]]
     draw_figure_moves()
 
 def handle_click(pos):
     #отметить зеленым если фигура ваша
     file_rank = ((int)(pos[1]/cell_size), (int)(pos[0]/cell_size))
     #на случай нажатия за пределы клеток
-    if file_rank > (7,7): 
+    if file_rank[0] > 7 or file_rank[1] > 7:
         return
     current_state.process(current_position, file_rank)
 
@@ -181,7 +181,7 @@ class figure_state(state):
         for i in current_available_cells: 
         # Если выбран доступный ход - его выполнение(передача в core)
         # Нужно полностью находить ход
-            if (int)(i[2]) == file_rank[0] and (int)(i[3]) == file_rank[1]:
+            if (int)(i.get_to()[0]) == file_rank[0] and (int)(i.get_to()[1]) == file_rank[1]:
                 # Передать ход в core
                 current_context.core.player_make_move(i)
                 # Переход к состоянию enemy_state

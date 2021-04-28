@@ -43,8 +43,7 @@ def find_knight_moves(player_color, position, rank, file):
         cache_file = file + i[0]
         cache_rank = rank + i[1]
         if (0 <= cache_file <=7) and (0 <= cache_rank <=7)  and cell_have_chessman(oponent_color, position[cache_file][cache_rank]):
-            all_knight_moves.append(current_pos_dig_not + digital_notation(cache_file,cache_rank))
-            #all_knight_moves.append(mc.CMove(player_color,current_pos_dig_not, digital_notation(cache_file,cache_rank)))
+            all_knight_moves.append(mc.CMove(player_color,current_pos_dig_not, digital_notation(cache_file,cache_rank)))
     return all_knight_moves
 
 def find_bishop_moves(player_color, position, rank, file):
@@ -59,9 +58,9 @@ def find_bishop_moves(player_color, position, rank, file):
             cache_rank = rank + j[1] * i
             if (0 <= cache_file <=7) and (0 <= cache_rank <=7):
                 if position[cache_file][cache_rank] == None:
-                    all_bishop_moves.append(current_pos_dig_not + digital_notation(cache_file,cache_rank))
+                    all_bishop_moves.append(mc.CMove(player_color,current_pos_dig_not, digital_notation(cache_file,cache_rank)))
                 elif cell_have_chessman(oponent_color, position[cache_file][cache_rank], False):
-                    all_bishop_moves.append(current_pos_dig_not + digital_notation(cache_file,cache_rank))
+                    all_bishop_moves.append(mc.CMove(player_color,current_pos_dig_not, digital_notation(cache_file,cache_rank)))
                     break
                 else:
                     break
@@ -81,9 +80,9 @@ def find_rook_moves(player_color, position, rank, file):
             cache_rank = rank + j[1] * i
             if (0 <= cache_file <=7) and (0 <= cache_rank <=7):
                 if position[cache_file][cache_rank] == None:
-                    all_rock_moves.append(current_pos_dig_not + digital_notation(cache_file,cache_rank))
+                    all_rock_moves.append(mc.CMove(player_color,current_pos_dig_not, digital_notation(cache_file,cache_rank)))
                 elif cell_have_chessman(oponent_color, position[cache_file][cache_rank], False):
-                    all_rock_moves.append(current_pos_dig_not + digital_notation(cache_file,cache_rank))
+                    all_rock_moves.append(mc.CMove(player_color,current_pos_dig_not, digital_notation(cache_file,cache_rank)))
                     break
                 else:
                     break
@@ -98,19 +97,19 @@ def find_pawn_moves(player_color, position, rank, file):
     all_pawn_moves = []
     # Ходы вперед
     if position[file + player_move_direction][rank] == None:
-        all_pawn_moves.append(current_pos_dig_not + digital_notation(file + player_move_direction,rank))
+        all_pawn_moves.append(mc.CMove(player_color,current_pos_dig_not, digital_notation(file + player_move_direction,rank), True))
         if (((int)(3.5 - player_move_direction * 1.5) * player_move_direction > file * player_move_direction ) and # до 3 полосы - два хода пешкой
         position[file + 2 * player_move_direction][rank] == None): 
-            all_pawn_moves.append(current_pos_dig_not + digital_notation(file + 2 * player_move_direction,rank))
+            all_pawn_moves.append(mc.CMove(player_color,current_pos_dig_not, digital_notation(file + 2 * player_move_direction,rank)))
     
     #Взятие другие фигур
     if (rank + 1 <= 7  and 
         cell_have_chessman(oponent_color, position[file + player_move_direction][rank + 1], False)):
-        all_pawn_moves.append(current_pos_dig_not + digital_notation(file + player_move_direction,rank + 1))
+        all_pawn_moves.append(mc.CMove(player_color,current_pos_dig_not, digital_notation(file + player_move_direction,rank + 1), True))
     
     if (rank - 1 >= 0  and 
         cell_have_chessman(oponent_color, position[file + player_move_direction][rank - 1], False)):
-        all_pawn_moves.append(current_pos_dig_not + digital_notation(file + player_move_direction,rank - 1))
+        all_pawn_moves.append(mc.CMove(player_color,current_pos_dig_not, digital_notation(file + player_move_direction,rank - 1), True))
     return all_pawn_moves
 
 def find_king_moves(player_color, position, rank, file, castling_data):
@@ -125,20 +124,20 @@ def find_king_moves(player_color, position, rank, file, castling_data):
         if (0<= file + moves[0] <= 7 and
             0<= rank + moves[1] <= 7):
             if cell_have_chessman(oponent_color, position[file + moves[0]][rank + moves[1]]):
-                all_king_moves.append(current_pos_dig_not + digital_notation(file + moves[0], rank + moves[1]))
+                all_king_moves.append(mc.CMove(player_color,current_pos_dig_not, digital_notation(file + moves[0],rank + moves[1])))
     #Рокировка
     #Короткая 0-0
     #Проверка на позицию короля - не нужна, так как передвижение короля, шахи и т.д учитывает castling_data
-    if (castling_data[0] and
+    if (castling_data[0] and 
         position[file][rank + 1] == None and
         position[file][rank + 2] == None):
-        all_king_moves.append("00")
+        all_king_moves.append(mc.CMove(player_color,"00"))
     #Длинная 0-0-0
     if (castling_data[1] and
         position[file][rank - 1] == None and
         position[file][rank - 2] == None and
         position[file][rank - 3 ] == None):
-        all_king_moves.append("000")
+        all_king_moves.append(mc.CMove(player_color,"000"))
 
 
     return all_king_moves
