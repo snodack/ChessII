@@ -98,13 +98,7 @@ def find_pawn_moves(player_color, position, rank, file):
     all_pawn_moves = []
     # Ходы вперед
     if position[file + player_move_direction][rank] == None:
-        if file + player_move_direction == (int)(player_move_direction*3.5 + 3.5):
-            all_pawn_moves.append(current_pos_dig_not + digital_notation(file + player_move_direction,rank) + Queen)
-            all_pawn_moves.append(current_pos_dig_not + digital_notation(file + player_move_direction,rank) + Rook)
-            all_pawn_moves.append(current_pos_dig_not + digital_notation(file + player_move_direction,rank) + Bishop)
-            all_pawn_moves.append(current_pos_dig_not + digital_notation(file + player_move_direction,rank) + Knight)
-        else:
-            all_pawn_moves.append(current_pos_dig_not + digital_notation(file + player_move_direction,rank))
+        all_pawn_moves.append(current_pos_dig_not + digital_notation(file + player_move_direction,rank))
         if (((int)(3.5 - player_move_direction * 1.5) * player_move_direction > file * player_move_direction ) and # до 3 полосы - два хода пешкой
         position[file + 2 * player_move_direction][rank] == None): 
             all_pawn_moves.append(current_pos_dig_not + digital_notation(file + 2 * player_move_direction,rank))
@@ -112,23 +106,11 @@ def find_pawn_moves(player_color, position, rank, file):
     #Взятие другие фигур
     if (rank + 1 <= 7  and 
         cell_have_chessman(oponent_color, position[file + player_move_direction][rank + 1], False)):
-        if rank == (int)(player_move_direction*3.5 + 3.5):
-            all_pawn_moves.append(current_pos_dig_not + digital_notation(file + player_move_direction,rank + 1) + Queen)
-            all_pawn_moves.append(current_pos_dig_not + digital_notation(file + player_move_direction,rank + 1) + Rook)
-            all_pawn_moves.append(current_pos_dig_not + digital_notation(file + player_move_direction,rank + 1) + Bishop)
-            all_pawn_moves.append(current_pos_dig_not + digital_notation(file + player_move_direction,rank + 1) + Knight)
-        else:
-            all_pawn_moves.append(current_pos_dig_not + digital_notation(file + player_move_direction,rank + 1))
+        all_pawn_moves.append(current_pos_dig_not + digital_notation(file + player_move_direction,rank + 1))
     
     if (rank - 1 >= 0  and 
         cell_have_chessman(oponent_color, position[file + player_move_direction][rank - 1], False)):
-        if rank == (int)(player_move_direction*3.5 + 3.5):
-            all_pawn_moves.append(current_pos_dig_not + digital_notation(file + player_move_direction,rank - 1) + Queen)
-            all_pawn_moves.append(current_pos_dig_not + digital_notation(file + player_move_direction,rank - 1) + Rook)
-            all_pawn_moves.append(current_pos_dig_not + digital_notation(file + player_move_direction,rank - 1) + Bishop)
-            all_pawn_moves.append(current_pos_dig_not + digital_notation(file + player_move_direction,rank - 1) + Knight)
-        else:
-            all_pawn_moves.append(current_pos_dig_not + digital_notation(file + player_move_direction,rank - 1))
+        all_pawn_moves.append(current_pos_dig_not + digital_notation(file + player_move_direction,rank - 1))
     return all_pawn_moves
 
 def find_king_moves(player_color, position, rank, file, castling_data):
