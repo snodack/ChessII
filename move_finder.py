@@ -37,133 +37,58 @@ def find_knight_moves(player_color, position, rank, file):
     oponent_color = 'b' if player_color else 'w'
     current_pos_dig_not = digital_notation(file,rank)
     all_knight_moves = []
-    if file - 2 >= 0:
-        if rank-1 >= 0 and cell_have_chessman(oponent_color, position[file-2][rank-1]):
-            all_knight_moves.append(current_pos_dig_not + digital_notation(file-2,rank-1))
-        if rank + 1 <=7 and  cell_have_chessman(oponent_color, position[file-2][rank+1]):
-             all_knight_moves.append(current_pos_dig_not + digital_notation(file - 2,rank + 1))
-    if file + 2 <=7:
-        if rank-1 >= 0 and cell_have_chessman(oponent_color, position[file+2][rank-1]):
-            all_knight_moves.append(current_pos_dig_not + digital_notation(file + 2,rank - 1))
-        if rank + 1 <=7 and cell_have_chessman(oponent_color, position[file+2][rank+1]):
-             all_knight_moves.append(current_pos_dig_not + digital_notation(file + 2,rank + 1))    
-    if rank - 2 >= 0:
-        if file-1 >= 0 and cell_have_chessman(oponent_color, position[file-1][rank-2]):
-            all_knight_moves.append(current_pos_dig_not + digital_notation(file - 1,rank - 2))
-        if file + 1 <=7 and cell_have_chessman(oponent_color, position[file+1][rank-2]):
-             all_knight_moves.append(current_pos_dig_not + digital_notation(file + 1,rank - 2))
-    if rank + 2 <= 7:
-        if file-1 >= 0 and cell_have_chessman(oponent_color, position[file-1][rank + 2]):
-            all_knight_moves.append(current_pos_dig_not + digital_notation(file - 1,rank + 2))
-        if file + 1 <=7 and cell_have_chessman(oponent_color, position[file+1][rank + 2]):
-             all_knight_moves.append(current_pos_dig_not + digital_notation(file + 1,rank + 2))
+    default_knight_moves = [[-2, -1], [-2, 1], [2, -1], [2, 1], [-1, -2], [1, -2], [-1, 2], [1, 2]]
+    for i in default_knight_moves:
+        # не выходить за пределы
+        cache_file = file + i[0]
+        cache_rank = rank + i[1]
+        if (0 <= cache_file <=7) and (0 <= cache_rank <=7)  and cell_have_chessman(oponent_color, position[cache_file][cache_rank]):
+            all_knight_moves.append(current_pos_dig_not + digital_notation(cache_file,cache_rank))
+            #all_knight_moves.append(mc.CMove(player_color,current_pos_dig_not, digital_notation(cache_file,cache_rank)))
     return all_knight_moves
 
 def find_bishop_moves(player_color, position, rank, file):
     oponent_color = 'b' if player_color else 'w'
     current_pos_dig_not = digital_notation(file,rank)
     all_bishop_moves = []
-    for i in range(1,8):
-        if (file + i <= 7  and
-             rank + i <=7):
-                if position[file + i][rank + i] == None:
-                    all_bishop_moves.append(current_pos_dig_not + digital_notation(file + i,rank + i))
-                elif cell_have_chessman(oponent_color, position[file + i][rank + i], False):
-                    all_bishop_moves.append(current_pos_dig_not + digital_notation(file + i,rank + i))
+    default_bishop_moves = [[-1, 1], [1, 1],[1, -1], [-1, -1]]
+    for j in default_bishop_moves:
+        for i in range(1,8):
+            # не выходить за пределы
+            cache_file = file + j[0] * i
+            cache_rank = rank + j[1] * i
+            if (0 <= cache_file <=7) and (0 <= cache_rank <=7):
+                if position[cache_file][cache_rank] == None:
+                    all_bishop_moves.append(current_pos_dig_not + digital_notation(cache_file,cache_rank))
+                elif cell_have_chessman(oponent_color, position[cache_file][cache_rank], False):
+                    all_bishop_moves.append(current_pos_dig_not + digital_notation(cache_file,cache_rank))
                     break
                 else:
                     break
-        else:
-                break
-    for i in range(1,8):
-        if (file + i <= 7  and
-             rank - i >= 0):
-            if position[file + i][rank - i] == None:
-                all_bishop_moves.append(current_pos_dig_not + digital_notation(file + i,rank - i))
-            elif cell_have_chessman(oponent_color, position[file + i][rank - i], False):
-                all_bishop_moves.append(current_pos_dig_not + digital_notation(file + i,rank - i))
-                break
             else:
-                    break
-        else:
-                break
-    
-    for i in range(1,8):
-        if (file - i >= 0  and
-             rank - i >= 0):
-            if position[file - i][rank - i] == None:
-                all_bishop_moves.append(current_pos_dig_not + digital_notation(file - i,rank - i))
-            elif cell_have_chessman(oponent_color, position[file - i][rank - i], False):
-                all_bishop_moves.append(current_pos_dig_not + digital_notation(file - i,rank - i))
-                break
-            else:
-                break
-        else:
-                break
-
-    for i in range(1,8):
-        if (file - i >= 0  and
-             rank + i <=7):
-            if position[file - i][rank + i] == None:
-                all_bishop_moves.append(current_pos_dig_not + digital_notation(file - i,rank + i))
-            elif cell_have_chessman(oponent_color, position[file - i][rank + i], False):
-                all_bishop_moves.append(current_pos_dig_not + digital_notation(file - i,rank + i))
-                break
-            else:
-                break
-             
-        else:
                 break
     return all_bishop_moves
 
 def find_rook_moves(player_color, position, rank, file):
     oponent_color = 'b' if  player_color else 'w'
-    all_rock_moves = []
     current_pos_dig_not = digital_notation(file,rank)
-    for i in ([j for j in range(-1,-8, -1)]):
-        if (file + i >=0 and file + i <= 7):
-            if position[file + i][rank] == None:
-                all_rock_moves.append(current_pos_dig_not + digital_notation(file + i,rank))
-            elif cell_have_chessman(oponent_color, position[file + i][rank], False):
-                all_rock_moves.append(current_pos_dig_not + digital_notation(file + i,rank))
-                break
+    all_rock_moves = []
+    default_rock_moves = [[-1, 0], [1, 0],[0, -1], [0, 1]]
+    for j in default_rock_moves:
+        for i in range(1,8):
+            # не выходить за пределы
+            cache_file = file + j[0] * i
+            cache_rank = rank + j[1] * i
+            if (0 <= cache_file <=7) and (0 <= cache_rank <=7):
+                if position[cache_file][cache_rank] == None:
+                    all_rock_moves.append(current_pos_dig_not + digital_notation(cache_file,cache_rank))
+                elif cell_have_chessman(oponent_color, position[cache_file][cache_rank], False):
+                    all_rock_moves.append(current_pos_dig_not + digital_notation(cache_file,cache_rank))
+                    break
+                else:
+                    break
             else:
                 break
-        else:
-            break
-    for i in ([j for j in range(1, 8)]):
-        if (file + i >=0 and file + i <= 7):
-            if position[file + i][rank] == None:
-                all_rock_moves.append(current_pos_dig_not + digital_notation(file + i,rank))
-            elif cell_have_chessman(oponent_color, position[file + i][rank], False):
-                all_rock_moves.append(current_pos_dig_not + digital_notation(file + i,rank))
-                break
-            else:
-                break
-        else:
-            break
-    for i in ([j for j in range(-1,-8, -1)]):
-        if (rank + i >=0):
-            if position[file][rank + i] == None:
-                all_rock_moves.append(current_pos_dig_not + digital_notation(file,rank + i))
-            elif cell_have_chessman(oponent_color, position[file][rank + i], False):
-                all_rock_moves.append(current_pos_dig_not + digital_notation(file,rank + i))
-                break
-            else:
-                break
-        else:
-            break
-    for i in ([j for j in range(1, 8)]):
-        if (rank + i <=7 ):
-            if position[file][rank + i] == None:
-                all_rock_moves.append(current_pos_dig_not + digital_notation(file,rank + i))
-            elif cell_have_chessman(oponent_color, position[file][rank + i], False):
-                all_rock_moves.append(current_pos_dig_not + digital_notation(file,rank + i))
-                break
-            else:
-                break
-        else:
-            break
     return all_rock_moves
 
 def find_pawn_moves(player_color, position, rank, file):
