@@ -9,6 +9,7 @@ white_color = pygame.Color(255,255,255)
 black_color = pygame.Color(65,25,0)
 green_color = pygame.Color(0,255,0)
 tips_color = pygame.Color(80,80,80)
+transormation_bg_color = pygame.Color(105, 105, 105)
 debug_mode = True # Позволяет играть самим с собой
 size = width, height = 900, 640
 chess_board_size = 640
@@ -105,10 +106,40 @@ def drawchessman(position, player_color):
     pygame.display.flip()
     return
 
-#отрисовка ходов
+def draw_transformation_window(rank, player_color):
+    '''
+    Функция отрисовки полей для выбора превращение пешки: Ферзь, Слон и т.д.
+    '''
+    color_figure = 'w' if current_player_color else 'b'
+    files_to_draw = [0, 1, 2, 3] if player_color else [7, 6, 5, 4]
+    transformation_figures = ['Q', 'R', 'B', 'K']
+    for i in range(len(files_to_draw)):
+        pygame.draw.circle(
+            screen, 
+            transormation_bg_color, 
+            ((int)(rank * cell_size + cell_size/2), (int)(files_to_draw[i]*cell_size +cell_size/2)), 
+            (int)(cell_size / 2),
+            width=0)
+        fig = chessmen[color_figure + transformation_figures[i]]
+        screen.blit(
+            fig, 
+            pygame.Rect(
+            rank*cell_size,
+            i*cell_size,
+            cell_size,
+            cell_size))
+    pygame.display.flip()
+
+
 def draw_figure_moves():
+    '''Отрисовка ходов'''
     for i in current_available_cells:
-        pygame.draw.circle(screen, green_color, ((int)(i.get_to()[1]) * cell_size + cell_size/2, (int)(i.get_to()[0])*cell_size +cell_size/2), cell_move_radius, width = 0)
+        pygame.draw.circle(
+            screen,
+            green_color,
+            ((int)(i.get_to()[1]) * cell_size + cell_size/2, 
+            (int)(i.get_to()[0])*cell_size +cell_size/2), 
+            cell_move_radius, width = 0)
     pygame.display.flip()
 
 def show_moves(file_rank):
@@ -182,6 +213,11 @@ class figure_state(state):
         # Если выбран доступный ход - его выполнение(передача в core)
         # Нужно полностью находить ход
             if (int)(i.get_to()[0]) == file_rank[0] and (int)(i.get_to()[1]) == file_rank[1]:
+                #Если это ход пешки на последнюю горизнталь
+                if i.is_pt():
+                    draw_transformation_window(file_rank[1], current_player_color)
+                    transition_to(transformation_state(i))
+                    return
                 # Передать ход в core
                 current_context.core.player_make_move(i)
                 # Переход к состоянию enemy_state
@@ -201,6 +237,35 @@ class enemy_state(state):
         # Обработка нажатия - не происходит
         # Предопределение ходов в будущем
         pass
+
+class transformation_state(state):
+    ''' Состояние описывает поведение графического модуля
+    во время выбора фигуры для трансформации пешка -> фигура'''
+    def __init__(self, move):
+        self.expected_move = move
+        self.files = [0, 1, 2, 3] if move.get_player_color() else [7, 6, 5, 4]
+    
+    def process(self, position, file_rank):
+        move_rank = self.expected_move.get_to_int()[1]
+        #Если это нажатие на одну из кнопок превращение
+        if file_rank[1] == move_rank:
+            for i in range(len(self.files)):
+                if self.files[i] == file_rank[0]:
+                    trans_figures = ['1', '2', '3', '4']
+                    self.expected_move.trans_to_figure(trans_figures[i])
+                    current_context.core.player_make_move(self.expected_move)
+                    if debug_mode:
+                        transition_to(default_state())
+                    else:
+                        transition_to(enemy_state())
+                    return
+        else:
+            transition_to(default_state())
+            current_state.process(position, file_rank)
+
+        pass
+    
+
 
 class graphic_context():
     def __init__(self, core_context):

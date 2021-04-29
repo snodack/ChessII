@@ -8,7 +8,7 @@ players_castling = [(True, True), (True, True)]
 stack_position = []
 stack_move = []
 global_position = [["bR","bN","bB","bQ","bK","bB","bN","bR"],
-                    ["bP","bP","bP","bP","bP","bP","bP","bP"],
+                    ["bP","bP","bP","bP","bP","bP","wP","bP"],
                     [None,None,None,None,None,None,None,None],
                     [None,None,None,None,None,None,None,None],
                     [None,None,None,None,None,None,None,None],
@@ -37,7 +37,7 @@ def make_move(global_position, i_move):
         }
         current_position_figure = ((int)(move[0]), (int)(move[1]));
         next_position_figure = ((int)(move[2]), (int)(move[3]))
-        position[next_position_figure[0]][1] = color_figure + figures[moves[4]]
+        position[next_position_figure[0]][next_position_figure[1]] = color_figure + figures[move[4]]
         position[current_position_figure[0]][current_position_figure[1]] = None
     # Обычные ходы "2233"
     elif len(move) > 3:

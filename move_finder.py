@@ -90,26 +90,40 @@ def find_rook_moves(player_color, position, rank, file):
                 break
     return all_rock_moves
 
+
 def find_pawn_moves(player_color, position, rank, file):
     oponent_color = 'b' if player_color else 'w'
     current_pos_dig_not = digital_notation(file,rank)
     player_move_direction = -2 * player_color  + 1
     all_pawn_moves = []
+    cache_file = file + player_move_direction
     # Ходы вперед
-    if position[file + player_move_direction][rank] == None:
-        all_pawn_moves.append(mc.CMove(player_color,current_pos_dig_not, digital_notation(file + player_move_direction,rank), True))
-        if (((int)(3.5 - player_move_direction * 1.5) * player_move_direction > file * player_move_direction ) and # до 3 полосы - два хода пешкой
-        position[file + 2 * player_move_direction][rank] == None): 
-            all_pawn_moves.append(mc.CMove(player_color,current_pos_dig_not, digital_notation(file + 2 * player_move_direction,rank)))
+    if position[cache_file][rank] == None:
+        if (cache_file)%7 ==0:
+            #Превращение пешек
+            all_pawn_moves.append(mc.CMove(player_color,current_pos_dig_not, digital_notation(cache_file,rank), True))
+        else:
+            all_pawn_moves.append(mc.CMove(player_color,current_pos_dig_not, digital_notation(cache_file,rank)))
+            if (((int)(3.5 - player_move_direction * 1.5) * player_move_direction > file * player_move_direction ) and # до 3 полосы - два хода пешкой
+            position[file + 2 * player_move_direction][rank] == None): 
+                all_pawn_moves.append(mc.CMove(player_color,current_pos_dig_not, digital_notation(file + 2 * player_move_direction,rank)))
     
     #Взятие другие фигур
     if (rank + 1 <= 7  and 
-        cell_have_chessman(oponent_color, position[file + player_move_direction][rank + 1], False)):
-        all_pawn_moves.append(mc.CMove(player_color,current_pos_dig_not, digital_notation(file + player_move_direction,rank + 1), True))
+        cell_have_chessman(oponent_color, position[cache_file][rank + 1], False)):
+        if (cache_file)%7 ==0:
+            #Превращение пешек
+            all_pawn_moves.append(mc.CMove(player_color,current_pos_dig_not, digital_notation(cache_file,rank + 1), True))
+        else:
+            all_pawn_moves.append(mc.CMove(player_color,current_pos_dig_not, digital_notation(cache_file,rank + 1)))
     
     if (rank - 1 >= 0  and 
-        cell_have_chessman(oponent_color, position[file + player_move_direction][rank - 1], False)):
-        all_pawn_moves.append(mc.CMove(player_color,current_pos_dig_not, digital_notation(file + player_move_direction,rank - 1), True))
+        cell_have_chessman(oponent_color, position[cache_file][rank - 1], False)):
+        if (cache_file)%7 ==0:
+            #Превращение пешек
+            all_pawn_moves.append(mc.CMove(player_color,current_pos_dig_not, digital_notation(cache_file,rank - 1), True))
+        else:
+            all_pawn_moves.append(mc.CMove(player_color,current_pos_dig_not, digital_notation(cache_file,rank - 1)))
     return all_pawn_moves
 
 def find_king_moves(player_color, position, rank, file, castling_data):
