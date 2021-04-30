@@ -125,7 +125,7 @@ def find_moves(position):
             color = "white" if current_player_color else "black"
             print(color + " lose!")
         else:
-            print
+            print("pat")
     return possible_moves
     
 def player_make_move(move):
