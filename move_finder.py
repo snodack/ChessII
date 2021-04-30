@@ -7,7 +7,7 @@ Rook = '2' # вроде работает
 Bishop = '3' # вроде работает
 Knight = '4' # вроде работает
 tm = time.time()
-def find_chess_moves(player_color, position, castling_data = (True, True)):
+def find_chess_moves(player_color, position, castling_data, last_move):
     all_exists_moves = []
     color_char = 'w' if player_color else 'b'
     for file in range(8):
@@ -16,7 +16,7 @@ def find_chess_moves(player_color, position, castling_data = (True, True)):
             if pos_fig != None and pos_fig[0] == color_char:
                 figure_char = pos_fig[1]
                 if figure_char == 'P':
-                    all_exists_moves += find_pawn_moves(player_color, position, rank, file)
+                    all_exists_moves += find_pawn_moves(player_color, position, rank, file, last_move)
                 elif figure_char == 'N':
                     all_exists_moves += find_knight_moves(player_color, position, rank, file)
                 elif figure_char == 'R':
@@ -91,7 +91,7 @@ def find_rook_moves(player_color, position, rank, file):
     return all_rock_moves
 
 
-def find_pawn_moves(player_color, position, rank, file):
+def find_pawn_moves(player_color, position, rank, file, last_move):
     oponent_color = 'b' if player_color else 'w'
     current_pos_dig_not = digital_notation(file,rank)
     player_move_direction = -2 * player_color  + 1
@@ -106,7 +106,7 @@ def find_pawn_moves(player_color, position, rank, file):
             all_pawn_moves.append(mc.CMove(player_color,current_pos_dig_not, digital_notation(cache_file,rank)))
             if (((int)(3.5 - player_move_direction * 1.5) * player_move_direction > file * player_move_direction ) and # до 3 полосы - два хода пешкой
             position[file + 2 * player_move_direction][rank] == None): 
-                all_pawn_moves.append(mc.CMove(player_color,current_pos_dig_not, digital_notation(file + 2 * player_move_direction,rank)))
+                all_pawn_moves.append(mc.CMove(player_color,current_pos_dig_not, digital_notation(file + 2 * player_move_direction,rank), aisle=True))
     
     #Взятие другие фигур
     if (rank + 1 <= 7  and 
@@ -124,6 +124,15 @@ def find_pawn_moves(player_color, position, rank, file):
             all_pawn_moves.append(mc.CMove(player_color,current_pos_dig_not, digital_notation(cache_file,rank - 1), True))
         else:
             all_pawn_moves.append(mc.CMove(player_color,current_pos_dig_not, digital_notation(cache_file,rank - 1)))
+
+    #Взятие на проходе
+    if (last_move != None and
+        last_move.get_allow_aisle() and
+        #На той же высоте
+        (4 - 1 *  player_color) == last_move.get_to_int()[0] == file and
+        # На сосеедней клетке
+        abs(rank - last_move.get_to_int()[1]) == 1):
+            all_pawn_moves.append(mc.CMove(player_color,current_pos_dig_not, digital_notation(cache_file,rank + (last_move.get_to_int()[1] - rank))))
     return all_pawn_moves
 
 def find_king_moves(player_color, position, rank, file, castling_data):

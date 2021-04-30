@@ -6,7 +6,7 @@ import asyncio
 current_player_color = True
 players_castling = [(True, True), (True, True)]
 stack_position = []
-stack_move = []
+stack_move = [None]
 global_position = [["bR","bN","bB","bQ","bK","bB","bN","bR"],
                     ["bP","bP","bP","bP","bP","bP","bP","bP"],
                     [None,None,None,None,None,None,None,None],
@@ -58,6 +58,16 @@ def make_move(global_position, i_move):
         elif (current_position_figure[1] == 0 and current_position_figure[0] == int(7 - 7 * current_player_color )):
             castling[current_player_color][1] == False
         
+        last_move = stack_move[-1]
+        if (last_move != None and
+            last_move.get_allow_aisle() and
+            figure[1] == 'P' and 
+            global_position[next_position_figure[0]][next_position_figure[1]] == None and
+            current_position_figure[1] != next_position_figure[1]):
+            cache = last_move.get_to_int()
+            position[cache[0]][cache[1]] = None
+
+        
     #Длинная рокировка "000"
     elif len(move) > 2:
         king_file = (int)(7 - 7 * (not current_player_color))
@@ -91,7 +101,7 @@ def find_moves(position):
     #Возможные ходы
     possible_moves = []
     # Moves without check by shah - ходы которые потенциально не могу быть произведены
-    move_wcbs = mf.find_chess_moves(current_player_color, position, players_castling[current_player_color])
+    move_wcbs = mf.find_chess_moves(current_player_color, position, players_castling[current_player_color], stack_move[-1])
     #Необходимо проверить их
     move_next_position = None
     for i in move_wcbs:
@@ -121,6 +131,7 @@ def player_make_move(move):
     global players_castling
     global current_player_color
     global_position, players_castling = make_move(global_position, move)
+    stack_move.append(move)
     current_player_color = not current_player_color
     gc.draw(global_position, current_player_color, find_moves(global_position))
 

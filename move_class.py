@@ -3,11 +3,12 @@
 # для этого ходп(пригодиться для рокировки и апргейда пешек). Также там можно иметь функцию преобразования 
 # в книжный вид для отображения истории игры
 class CMove:
-    def __init__(self, player_color ,file_rank_from, file_rank_to = None, pawn_transformation = False):
+    def __init__(self, player_color, file_rank_from, file_rank_to = None, pawn_transformation = False, aisle = False):
         self.cell_from = file_rank_from
         self.cell_to = file_rank_to
         self.player_color = player_color
         self.pawn_transformation = pawn_transformation 
+        self.aisle = aisle
         self.trans_to = ''
     def get_from(self):
         '''
@@ -24,6 +25,7 @@ class CMove:
         Возвращает координаты клетки куда необходимо нажать чтобы совершить ход в значении (int, int)
         '''
         return ((int)(self.cell_to[0]), (int)(self.cell_to[1]))
+
     def get_to(self):
         '''
         Возвращает координаты клетки куда необходимо нажать чтобы совершить ход
@@ -64,3 +66,8 @@ class CMove:
         Возвращает цвет игрока сделавшего ход
         '''
         return self.player_color
+    def get_allow_aisle(self):
+        '''
+        Возвращает значение - можно ли после этого хода совершить взятие на проходе
+        '''
+        return self.aisle
