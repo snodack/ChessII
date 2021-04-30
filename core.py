@@ -8,12 +8,12 @@ players_castling = [(True, True), (True, True)]
 stack_position = []
 stack_move = []
 global_position = [["bR","bN","bB","bQ","bK","bB","bN","bR"],
-                    ["bP","bP","bP","bP","bP","bP","wP","bP"],
+                    ["bP","bP","bP","bP","bP","bP","bP","bP"],
                     [None,None,None,None,None,None,None,None],
                     [None,None,None,None,None,None,None,None],
                     [None,None,None,None,None,None,None,None],
                     [None,None,None,None,None,None,None,None],
-                    ["wP","wP","wP","wP","wP","wP","wP","wP"],
+                    ["wP","wP","wP","wP","wP","wP","bP","wP"],
                     ["wR","wN","wB","wQ","wK","wB","wN","wR"]
 ]
 
@@ -33,7 +33,7 @@ def make_move(global_position, i_move):
             '1': 'Q',
             '2': 'R',
             '3': 'B',
-            '4': 'K'
+            '4': 'N'
         }
         current_position_figure = ((int)(move[0]), (int)(move[1]));
         next_position_figure = ((int)(move[2]), (int)(move[3]))

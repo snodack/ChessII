@@ -112,7 +112,7 @@ def draw_transformation_window(rank, player_color):
     '''
     color_figure = 'w' if current_player_color else 'b'
     files_to_draw = [0, 1, 2, 3] if player_color else [7, 6, 5, 4]
-    transformation_figures = ['Q', 'R', 'B', 'K']
+    transformation_figures = ['Q', 'R', 'B', 'N']
     for i in range(len(files_to_draw)):
         pygame.draw.circle(
             screen, 
@@ -125,7 +125,7 @@ def draw_transformation_window(rank, player_color):
             fig, 
             pygame.Rect(
             rank*cell_size,
-            i*cell_size,
+            files_to_draw[i]*cell_size,
             cell_size,
             cell_size))
     pygame.display.flip()
