@@ -124,6 +124,8 @@ def find_moves(position):
         if not mf.check_shah(move_next_position, current_player_color):
             color = "white" if current_player_color else "black"
             print(color + " lose!")
+        else:
+            print
     return possible_moves
     
 def player_make_move(move):
