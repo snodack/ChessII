@@ -192,13 +192,14 @@ class state(ABC):
 # Класс обычного состояния
 class default_state(state):
     def process(self, position, file_rank):
+        draw_board(current_player_color, file_rank)
+        drawchessman(current_position,current_player_color)
         # Обработка нажатия на клетку
         color_figure = 'w' if current_player_color else 'b'
         fig = current_position[file_rank[0]][file_rank[1]]
         if fig != None and fig[0] == color_figure:
 
-            draw_board(current_player_color, file_rank)
-            drawchessman(current_position,current_player_color)
+            
             # Показ доступных ходов
             show_moves(file_rank)
             # Переход к состоянию figure_state
@@ -208,6 +209,8 @@ class default_state(state):
 
 class figure_state(state):
     def process(self, position, file_rank):
+        draw_board(current_player_color)
+        drawchessman(current_position,current_player_color)
         # Обработка нажатия на клетку
         for i in current_available_cells: 
         # Если выбран доступный ход - его выполнение(передача в core)
