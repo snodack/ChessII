@@ -4,10 +4,25 @@ import asyncio
 import move_finder as mf
 import move_class as mc
 from random import randint
+from gym import spaces, error, utils
 
-
-WIN_REWARD
-DRAW_REWARD
+CASTLING_REWARD = 1
+PAWN_TRANSFORMATON_REWARD = {
+            '1': 10,
+            '2': 8,
+            '3': 5,
+            '4': 5
+        }
+FIGURE_COST_REWARD= {
+            'Q': 5,
+            'R': 3,
+            'B': 2,
+            'N': 2,
+            'P': 1,
+        }
+WIN_REWARD = 100
+DRAW_REWARD = -100
+LOSE_REWARD = -100
 INVALID_ACTION_REWARD = -10
 VALID_ACTION_REWARD = 1
 LOG = True
@@ -17,7 +32,7 @@ global_position = [["bR","bN","bB","bQ","bK","bB","bN","bR"],
                     [None,None,None,None,None,None,None,None],
                     [None,None,None,None,None,None,None,None],
                     [None,None,None,None,None,None,None,None],
-                    ["wP","wP","wP","wP","wP","wP","bP","wP"],
+                    ["wP","wP","wP","wP","wP","wP","wP","wP"],
                     ["wR","wN","wB","wQ","wK","wB","wN","wR"]
 ]
 def check_castling_shah(check_position, player_color, long_castling):
@@ -34,7 +49,7 @@ def check_castling_shah(check_position, player_color, long_castling):
         return False
     return True
 
-def find_moves(position, player_color):
+def find_moves(position, player_color, players_castling, stack_move):
     #Возможные ходы
     possible_moves = []
     # Moves without check by shah - ходы которые потенциально не могу быть произведены
@@ -53,20 +68,15 @@ def find_moves(position, player_color):
                 #Коротка рокировка
                 move_check_result = check_castling_shah(position,player_color, False)
         else:
-            move_next_position = make_move(position, i)[0]
+            move_next_position = make_move(position, i, player_color, players_castling, stack_move)[0]
             move_check_result =  mf.check_shah(move_next_position, player_color)
         if move_check_result:
              possible_moves.append(i)
-    #Перенести отсюда
-    if possible_moves == []:
-        if not mf.check_shah(move_next_position, player_color):
-            color = "white" if player_color else "black"
-            print(color + " lose!")
-        else:
-            print("pat")
+    possible_moves.append(mc.CMove(player_color, ""))
     return possible_moves # for allget_move
 
-def make_move(global_position, i_move, player_color):
+def make_move(global_position, i_move, player_color, players_castling, stack_move):
+    reward = 0
     move = i_move.get_move()
     position = copy.deepcopy(global_position) #копия глобальной позиции - дабы не портить основу
     castling = copy.deepcopy(players_castling)
@@ -83,6 +93,7 @@ def make_move(global_position, i_move, player_color):
         next_position_figure = ((int)(move[2]), (int)(move[3]))
         position[next_position_figure[0]][next_position_figure[1]] = color_figure + figures[move[4]]
         position[current_position_figure[0]][current_position_figure[1]] = None
+        reward = PAWN_TRANSFORMATON_REWARD[move[4]]
     # Обычные ходы "2233"
     elif len(move) > 3:
         #Разбираем ход
@@ -90,8 +101,12 @@ def make_move(global_position, i_move, player_color):
         current_position_figure = ((int)(move[0]), (int)(move[1]))
         #Позиция фигуры после хода
         next_position_figure = ((int)(move[2]), (int)(move[3]))
+        opp_figure = position[next_position_figure[0]][next_position_figure[1]]
+        if opp_figure != None:
+            reward = FIGURE_COST_REWARD[opp_figure[1]]
         figure, position[current_position_figure[0]][current_position_figure[1]] = position[current_position_figure[0]][current_position_figure[1]], None
         position[next_position_figure[0]][next_position_figure[1]] = figure
+
         # Убираем возможность рокировки, при движении короля
         if figure[1] == 'K':
             castling[player_color] = (False, False)
@@ -119,22 +134,28 @@ def make_move(global_position, i_move, player_color):
         position[king_file][4], position[king_file][2] = None , position[king_file][4]
         position[king_file][3], position[king_file][0] = position[king_file][7], None
         castling[player_color] = (False, False)
+        reward = CASTLING_REWARD
     #Короткая рокировка "00"
-    else:
+    elif (len(move)==2):
         king_file = (int)(7 - 7 * (not player_color))
         position[king_file][4], position[king_file][6] = None , position[king_file][4]
         position[king_file][5], position[king_file][7] = position[king_file][7], None
         castling[player_color] = (False, False)
-    return (position, castling)
+        reward = CASTLING_REWARD
+    elif (len(move)==0):
+        return (position, castling, LOSE_REWARD, True)
+    return (position, castling, reward, False)
 
 class Chess_Environment(gym.Env):
     def __init__(self, actor_color = True):
-        self.moves_max = 149
+        self.moves_max = 70
         self.observation_space = spaces.Box(-6, 6, (8, 8)) #Поле 8 на 8, 6 разных фигур + 0 = пустое поле
         self.action_space = spaces.Discrete(64 * 64 + 16 * 8 *4 + 4 + 1)#Передвижение с любой клетки на другую 64 * 64, 8 рядов * 3 клетки от пешки(1 прямо, 2 при рублении) * 4 разные фигуры + сдача
         self.current_color = True
         self.actor_color = actor_color
+        self.players_castling = [(True, True), (True, True)]
         self.opponent_type = 0 #random moves
+        self.reset()
     def reset(self):
         """
         Resets the state of the environment, returning an initial observation.
@@ -144,21 +165,25 @@ class Chess_Environment(gym.Env):
         self.prev_state = None
         self.done = False
         self.current_color = True
-        self.saved_states = defaultdict(lambda: 0)
+        self.stack_move = [None]
         self.repetitions = 0  # 3 repetitions ==> DRAW
         self.move_count = 0
         self.players_castling = [(True, True), (True, True)]
-        self.state = self.to_gym_state(self)
+        self.to_gym_state()
+        self.info = ""
 
-        self.possible_moves = find_moves(self.game_state, self.current_color)
+        self.possible_moves = find_moves(self.game_state, self.current_color, self.players_castling, self.stack_move)
 
         #Если игрок играет за черных
         if not self.actor_color:
             #Рандомный ход компьтера, позже игра против себя
-            #self.state, _, _ = make_move(white_first_action)
-            self.move_count += 1
-            self.current_color = False
-            self.possible_moves = find_moves(self.game_state, self.current_color)
+            opponent_move = self.opponent_policy(self)
+            # make move
+            self.game_state, self.players_castling, opp_reward, self.done = make_move(self.game_state, opponent_move, self.current_color, self.players_castling, self.stack_move)
+            self.stack_move.append(opponent_move)
+            self.to_gym_state()
+            self.current_color  = not self.current_color
+            self.possible_moves = find_moves(self.game_state, self.current_color, self.players_castling, self.stack_move)
         return self.state
 
     def step(self, action):
@@ -203,25 +228,27 @@ class Chess_Environment(gym.Env):
         if self.move_count > self.moves_max:
             return (
                 self.state,
-                0.0,
+                DRAW_REWARD,
                 True,
                 self.info,
             )
-
+        self.move_count +=1
         # valid action reward
         reward = VALID_ACTION_REWARD
         # make move
-        self.game_state, move_reward, self.done = make_move(action_to_game)
-        self.state = self.to_gym_state(self)
+        self.game_state, self.players_castling, move_reward, self.done = make_move(self.game_state, action_to_game, self.current_color, self.players_castling, self.stack_move)
+        self.stack_move.append(action_to_game)
+        self.to_gym_state()
         reward += move_reward
-
+        if self.done:
+            return self.state, reward, self.done, self.info
         # opponent play
-        self.current_color != self.current_color
-        self.possible_moves = find_moves(self.game_state, self.current_color)
+        self.current_color  = not self.current_color
+        self.possible_moves = find_moves(self.game_state, self.current_color, self.players_castling, self.stack_move)
         # check if there are no possible_moves for opponent
         if not self.possible_moves:
             # mat
-            if not mf.check_shah(self.game_state, self.current_color)
+            if not mf.check_shah(self.game_state, self.current_color):
                 if LOG:
                     color = "white" if self.current_color else "black"
                     print(color + " lose!")
@@ -235,16 +262,16 @@ class Chess_Environment(gym.Env):
             return self.state, reward, self.done, self.info
 
         # Bot Opponent play
-        opponent_move = self.opponent_policy(self)
+        opponent_move = self.opponent_policy()
         # make move
-        self.game_state, opp_reward, self.done = make_move(opponent_move)
-        self.state = self.to_gym_state(self)
-        self.current_color != self.current_color
-        self.possible_moves = find_moves(self.game_state, self.current_color)
+        self.game_state, self.players_castling, opp_reward, self.done = make_move(self.game_state, opponent_move, self.current_color, self.players_castling, self.stack_move)
+        self.to_gym_state()
+        self.current_color  = not self.current_color
+        self.possible_moves = find_moves(self.game_state, self.current_color, self.players_castling, self.stack_move)
         reward -= opp_reward
         # check if there are no possible_moves for opponent
-        if not self.possible_moves # mat
-            if not mf.check_shah(self.game_state, self.current_color)
+        if not self.possible_moves: # mat
+            if not mf.check_shah(self.game_state, self.current_color):
                 if LOG:
                     color = "white" if self.current_color else "black"
                     print(color + " lose!")
@@ -254,8 +281,6 @@ class Chess_Environment(gym.Env):
                 if LOG:
                     print("pat")
                     reward += DRAW_REWARD
-        if self.current_player == WHITE:
-            self.move_count += 1
 
         return self.state, reward, self.done, self.info
 
@@ -279,7 +304,7 @@ class Chess_Environment(gym.Env):
                     else:
                         return -1
                 elif _action == 4:
-                    return 0
+                    return ""
             #pawn transformation
             else:
                 #black
@@ -288,21 +313,43 @@ class Chess_Environment(gym.Env):
                     from_cell = "1" + (_action%8*4)
                     to_cell = "0" + (_action%16*4)
                     figure = _action%16*8 + 1
-                    return = from_cell + to_cell + (str)(figure)
+                    return from_cell + to_cell + (str)(figure)
                 else:
                     #white
                     from_cell = "6" + (_action%8*4)
                     to_cell = "7" + (_action%16*4)
                     figure = _action%16*8 + 1
-                    return = from_cell + to_cell + (str)(figure)
+                    return from_cell + to_cell + (str)(figure)
         _from, _to = action // 64, action % 64
-        x0, y0 = (str)_from // 8, (str)_from % 8
-        x1, y1 = (str)_to // 8, (str)_to % 8
+        x0, y0 = (str)(_from // 8), (str)(_from % 8)
+        x1, y1 = (str)(_to // 8), (str)(_to % 8)
         return y0 + x0 +y1 +x1
+
     def opponent_policy(self):
         if self.opponent_type == 0:
             #random move
-            rand_move = self.possible_moves[randint(0, len(self.possible_moves))]
+            rand_move = self.possible_moves[randint(0, len(self.possible_moves)-1)]
             return rand_move
+
+    def to_gym_state(self):
+        '''
+        Преобразует состояние игры(game_state) в сотояние(state) для работы нейронной сети
+        Исправить для игры за черных
+        '''
+        figures = {'P': 1, 'N': 2, 'B': 3, 'R': 4, 'Q': 5, 'K': 6} # empty = 0
+        game_state = []
+        for i in range(8):
+            game_state.append([])
+            for j in range(8):
+                i_j_cell = self.game_state[i][j]
+                if i_j_cell:
+                    gym_figure = figures[i_j_cell[1]]
+                    if (i_j_cell[0] == 'b' and self.current_color) or (i_j_cell[0] == 'w' and  not self.current_color):
+                        gym_figure *= -1
+                    game_state[i].append(gym_figure)
+                else:#empty cell
+                    game_state[i].append(0)
+        self.state = game_state
+
 
         
