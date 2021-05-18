@@ -6,6 +6,8 @@ import move_class as mc
 from random import randint
 from gym import spaces, error, utils
 
+from stable_baselines import PPO2
+
 CASTLING_REWARD = 1
 PAWN_TRANSFORMATON_REWARD = {
             '1': 10,
@@ -14,17 +16,18 @@ PAWN_TRANSFORMATON_REWARD = {
             '4': 5
         }
 FIGURE_COST_REWARD= {
-            'Q': 5,
-            'R': 3,
-            'B': 2,
-            'N': 2,
-            'P': 1,
+            'Q': 20,
+            'R': 10,
+            'B': 10,
+            'N': 10,
+            'P': 5,
+            'K': 10
         }
 WIN_REWARD = 100
 DRAW_REWARD = -100
 LOSE_REWARD = -100
 INVALID_ACTION_REWARD = -10
-VALID_ACTION_REWARD = 1
+VALID_ACTION_REWARD = 20
 LOG = True
 global_position = [["bR","bN","bB","bQ","bK","bB","bN","bR"],
                     ["bP","bP","bP","bP","bP","bP","bP","bP"],
@@ -103,6 +106,8 @@ def make_move(global_position, i_move, player_color, players_castling, stack_mov
         next_position_figure = ((int)(move[2]), (int)(move[3]))
         opp_figure = position[next_position_figure[0]][next_position_figure[1]]
         if opp_figure != None:
+            if opp_figure[1] == 'K':
+                reward =10
             reward = FIGURE_COST_REWARD[opp_figure[1]]
         figure, position[current_position_figure[0]][current_position_figure[1]] = position[current_position_figure[0]][current_position_figure[1]], None
         position[next_position_figure[0]][next_position_figure[1]] = figure
@@ -142,15 +147,18 @@ def make_move(global_position, i_move, player_color, players_castling, stack_mov
         position[king_file][5], position[king_file][7] = position[king_file][7], None
         castling[player_color] = (False, False)
         reward = CASTLING_REWARD
-    elif (len(move)==0):
+    elif (move=='#'):
+        print(f'action {move}')
         return (position, castling, LOSE_REWARD, True)
     return (position, castling, reward, False)
 
 class Chess_Environment(gym.Env):
-    def __init__(self, actor_color = True):
+    metadata = {'render.modes': ['human']}
+    def __init__(self, actor_color = False):
+        self.log = []
         self.moves_max = 70
         self.observation_space = spaces.Box(-6, 6, (8, 8)) #Поле 8 на 8, 6 разных фигур + 0 = пустое поле
-        self.action_space = spaces.Discrete(64 * 64 + 16 * 8 *4 + 4 + 1)#Передвижение с любой клетки на другую 64 * 64, 8 рядов * 3 клетки от пешки(1 прямо, 2 при рублении) * 4 разные фигуры + сдача
+        self.action_space = spaces.Discrete(64 * 64 + 510 + 4)#Передвижение с любой клетки на другую 64 * 64, 8 рядов * 3 клетки от пешки(1 прямо, 2 при рублении) * 4 разные фигуры + сдача
         self.current_color = True
         self.actor_color = actor_color
         self.players_castling = [(True, True), (True, True)]
@@ -170,14 +178,14 @@ class Chess_Environment(gym.Env):
         self.move_count = 0
         self.players_castling = [(True, True), (True, True)]
         self.to_gym_state()
-        self.info = ""
+        self.info = {}
 
         self.possible_moves = find_moves(self.game_state, self.current_color, self.players_castling, self.stack_move)
 
         #Если игрок играет за черных
         if not self.actor_color:
             #Рандомный ход компьтера, позже игра против себя
-            opponent_move = self.opponent_policy(self)
+            opponent_move = self.opponent_policy()
             # make move
             self.game_state, self.players_castling, opp_reward, self.done = make_move(self.game_state, opponent_move, self.current_color, self.players_castling, self.stack_move)
             self.stack_move.append(opponent_move)
@@ -202,14 +210,19 @@ class Chess_Environment(gym.Env):
         info : a dictionary containing other diagnostic information from the previous action
         """
         # validate action
-        assert self.action_space.contains(action), "ACTION ERROR {}".format(action)
+        #assert self.action_space.contains(action), "ACTION ERROR {}".format(action)
 
         # action invalid in current state
         action_as_move = self.action_to_move(action)
         action_to_game = None
         for i in self.possible_moves:
-            if i.get_move() == action_as_move:
+            if i.get_move() == action_as_move and not i.is_pt():
                 action_to_game = i
+                break
+            elif len(action_as_move) == 5 and i.get_move() == action_as_move[0:4] and  i.is_pt():
+                action_to_game = i
+                action_to_game.trans_to_figure(action_as_move[4])
+
         
         #invalid moves reward
         if action_to_game == None:
@@ -289,47 +302,51 @@ class Chess_Environment(gym.Env):
         if action >= 64 * 64:
             _action = action - 64 * 64
             #00 000 cancel
-            if _action >=16 * 3 * 4:
-                _action -= 16 * 3 * 4
-                if (_action == 0 or action == 1):
+            if _action >=511:
+                _action -= 511
+                if (_action == 0 or _action == 1):
                     if self.actor_color:
                         if _action == 0: return "00"
                         else: return "000"
-                    else:
-                        return -1
-                if (_action == 2 or action == 3):
+                if (_action == 2 or _action == 3):
                     if not self.actor_color:
                         if _action == 2: return "00"
                         else: return "000"
-                    else:
-                        return -1
                 elif _action == 4:
-                    return ""
+                    return "#"
+                else: return "N"
             #pawn transformation
             else:
                 #black
-                if _action >=16*8*4:
-                    _action -= 16*8*4
-                    from_cell = "1" + (_action%8*4)
-                    to_cell = "0" + (_action%16*4)
-                    figure = _action%16*8 + 1
+                if _action >=256:
+                    _action -= 256
+                    from_cell = "1" + (str)((_action//(32))%64)
+                    to_cell = "0" + (str)((_action//(8))%8)
+                    figure = (str)(_action%4 + 1)
+                    assert int(from_cell[1])<8 and int(to_cell[1])<8, f'error 2 {action}' 
                     return from_cell + to_cell + (str)(figure)
                 else:
                     #white
-                    from_cell = "6" + (_action%8*4)
-                    to_cell = "7" + (_action%16*4)
-                    figure = _action%16*8 + 1
+                    from_cell = "6" + (str)((_action//(32))%64)
+                    to_cell = "7" + (str)((_action//(8))%8)
+                    figure = (str)(_action%4 + 1)
+                    assert int(from_cell[1])<8 and int(to_cell[1])<8, f'error 3 {action}' 
                     return from_cell + to_cell + (str)(figure)
         _from, _to = action // 64, action % 64
         x0, y0 = (str)(_from // 8), (str)(_from % 8)
         x1, y1 = (str)(_to // 8), (str)(_to % 8)
+        assert int(x0)<8 and int(y0)<8 and int(x1)<8 and int(y1)<8, f'error {action}' 
         return y0 + x0 +y1 +x1
 
     def opponent_policy(self):
         if self.opponent_type == 0:
             #random move
             rand_move = self.possible_moves[randint(0, len(self.possible_moves)-1)]
+            if rand_move.is_pt():
+                rand_move.trans_to_figure('1')
             return rand_move
+            
+
 
     def to_gym_state(self):
         '''
@@ -350,6 +367,10 @@ class Chess_Environment(gym.Env):
                 else:#empty cell
                     game_state[i].append(0)
         self.state = game_state
-
+    def render(self):
+        pass
+    def close(self):
+        print("close")
+        pass
 
         
