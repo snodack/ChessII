@@ -35,4 +35,5 @@ def get_actions():
                 if (0 <= cache_file <=7) and (0 <= cache_rank <=7):
                     moves.append(str(file)+ str(rank) + str(cache_file)+ str(cache_rank))
     return moves
+
                     

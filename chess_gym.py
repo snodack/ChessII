@@ -3,6 +3,7 @@ import copy
 import asyncio
 import move_finder as mf
 import move_class as mc
+import generator_moves as gm
 from random import randint
 from gym import spaces, error, utils
 
@@ -154,11 +155,12 @@ def make_move(global_position, i_move, player_color, players_castling, stack_mov
 
 class Chess_Environment(gym.Env):
     metadata = {'render.modes': ['human']}
-    def __init__(self, actor_color = False):
+    def __init__(self, actor_color = True):
         self.log = []
         self.moves_max = 70
+        self.all_moves = gm.get_actions()
         self.observation_space = spaces.Box(-6, 6, (8, 8)) #Поле 8 на 8, 6 разных фигур + 0 = пустое поле
-        self.action_space = spaces.Discrete(64 * 64 + 510 + 4)#Передвижение с любой клетки на другую 64 * 64, 8 рядов * 3 клетки от пешки(1 прямо, 2 при рублении) * 4 разные фигуры + сдача
+        self.action_space = spaces.Discrete(1792 + 510 + 4)#Передвижение с любой клетки на другую 1792, 8 рядов * 3 клетки от пешки(1 прямо, 2 при рублении) * 4 разные фигуры + сдача
         self.current_color = True
         self.actor_color = actor_color
         self.players_castling = [(True, True), (True, True)]
@@ -299,8 +301,8 @@ class Chess_Environment(gym.Env):
 
     def action_to_move(self, action):
         #not default move
-        if action >= 64 * 64:
-            _action = action - 64 * 64
+        if action >= 1792:
+            _action = action - 1792
             #00 000 cancel
             if _action >=511:
                 _action -= 511
@@ -332,11 +334,7 @@ class Chess_Environment(gym.Env):
                     figure = (str)(_action%4 + 1)
                     assert int(from_cell[1])<8 and int(to_cell[1])<8, f'error 3 {action}' 
                     return from_cell + to_cell + (str)(figure)
-        _from, _to = action // 64, action % 64
-        x0, y0 = (str)(_from // 8), (str)(_from % 8)
-        x1, y1 = (str)(_to // 8), (str)(_to % 8)
-        assert int(x0)<8 and int(y0)<8 and int(x1)<8 and int(y1)<8, f'error {action}' 
-        return y0 + x0 +y1 +x1
+        return self.all_moves[action]
 
     def opponent_policy(self):
         if self.opponent_type == 0:
