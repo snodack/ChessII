@@ -151,13 +151,13 @@ def make_move(global_position, i_move, player_color, players_castling, stack_mov
     elif (move=='#'):
         print(f'action {move}')
         return (position, castling, LOSE_REWARD, True)
-    return (position, castling, reward, False)
+    return (position, castling, 0, False)
 
 class Chess_Environment(gym.Env):
     metadata = {'render.modes': ['human']}
     def __init__(self, actor_color = True):
         self.log = []
-        self.moves_max = 70
+        self.moves_max = 150
         self.all_moves = gm.get_actions()
         self.observation_space = spaces.Box(-6, 6, (8, 8)) #Поле 8 на 8, 6 разных фигур + 0 = пустое поле
         self.action_space = spaces.Discrete(1792 + 510 + 4)#Передвижение с любой клетки на другую 1792, 8 рядов * 3 клетки от пешки(1 прямо, 2 при рублении) * 4 разные фигуры + сдача
@@ -178,6 +178,7 @@ class Chess_Environment(gym.Env):
         self.stack_move = [None]
         self.repetitions = 0  # 3 repetitions ==> DRAW
         self.move_count = 0
+        self.last_pawn_move = 0
         self.players_castling = [(True, True), (True, True)]
         self.to_gym_state()
         self.info = {}
@@ -247,7 +248,8 @@ class Chess_Environment(gym.Env):
                 True,
                 self.info,
             )
-        self.move_count +=1
+        if not self.actor_color:
+            self.move_count +=1
         # valid action reward
         reward = VALID_ACTION_REWARD
         # make move
@@ -273,6 +275,8 @@ class Chess_Environment(gym.Env):
                 if LOG:
                     print("pat")
                     reward += DRAW_REWARD
+        if self.actor_color:
+            self.move_count +=1
         if self.done:
             return self.state, reward, self.done, self.info
 
@@ -306,14 +310,12 @@ class Chess_Environment(gym.Env):
             #00 000 cancel
             if _action >=511:
                 _action -= 511
-                if (_action == 0 or _action == 1):
-                    if self.actor_color:
-                        if _action == 0: return "00"
-                        else: return "000"
-                if (_action == 2 or _action == 3):
-                    if not self.actor_color:
-                        if _action == 2: return "00"
-                        else: return "000"
+                if (_action == 0 or _action == 1) and self.actor_color:
+                    if _action == 0: return "00"
+                    else: return "000"
+                if (_action == 2 or _action == 3) and not self.actor_color:
+                    if _action == 2: return "00"
+                    else: return "000"
                 elif _action == 4:
                     return "#"
                 else: return "N"

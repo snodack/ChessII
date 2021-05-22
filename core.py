@@ -1,7 +1,12 @@
+import importlib
 import move_finder as mf
 import graphic as gc
 import copy
 import asyncio
+import fen_notation as fen
+from stockfish import Stockfish
+stockfish = Stockfish("/home/snodack/stockfish/stockfish_13_linux_x64_bmi2/stockfish_13_linux_x64_bmi2")
+stockfish = Stockfish(parameters={"Threads": 2, "Minimum Thinking Time": 30})
 current_player_color = True
 players_castling = [(True, True), (True, True)]
 stack_position = []
@@ -12,7 +17,7 @@ global_position = [["bR","bN","bB","bQ","bK","bB","bN","bR"],
                     [None,None,None,None,None,None,None,None],
                     [None,None,None,None,None,None,None,None],
                     [None,None,None,None,None,None,None,None],
-                    ["wP","wP","wP","wP","wP","wP","bP","wP"],
+                    ["wP","wP","wP","wP","wP","wP","wP","wP"],
                     ["wR","wN","wB","wQ","wK","wB","wN","wR"]
 ]
 
@@ -134,6 +139,9 @@ def player_make_move(move):
     global_position, players_castling = make_move(global_position, move)
     stack_move.append(move)
     current_player_color = not current_player_color
+    fen_string = fen.to_fen(global_position, current_player_color, players_castling, stack_move[-1], len(stack_move)-1)
+    #sf.set_position(fen_string)
+    #print(sf.get_evaluation())
     gc.draw(global_position, current_player_color, find_moves(global_position))
 
 
