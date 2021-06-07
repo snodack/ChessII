@@ -1,0 +1,4 @@
+﻿  pch.cpp
+  dllmain.cpp
+     Создается библиотека D:\ChessII\c_segment\chess_dl\Debug\chess_dl.lib и объект D:\ChessII\c_segment\chess_dl\Debug\chess_dl.exp
+  chess_dl.vcxproj -> D:\ChessII\c_segment\chess_dl\Debug\chess_dl.dll

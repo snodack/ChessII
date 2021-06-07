@@ -41,7 +41,7 @@ def to_fen(state, current_color, castling, last_move, count_move, last_pawn_move
         fen_state += '-'
 
     #pawn
-    if last_move.get_allow_aisle():
+    if last_move and  last_move.get_allow_aisle():
         def_move = last_move.get_def_format()
         if last_move.player_color:
             fen_state += f' {def_move[2]}3'

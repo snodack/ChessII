@@ -1,0 +1,4 @@
+﻿  pch.cpp
+D:\ChessII\c_segment\chess_dl\pch.cpp(281,78): warning C4267: +=: преобразование из "size_t" в "int"; возможна потеря данных
+  dllmain.cpp
+  chess_dl.vcxproj -> D:\ChessII\c_segment\chess_dl\x64\Debug\chess_dl.dll

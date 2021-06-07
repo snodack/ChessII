@@ -98,4 +98,23 @@ class CMove:
                 rank_table[self.cell_to[1]] + file_table[self.cell_to[0]]
             return def_format
         else:
-            return self.cell_from 
+            return self.cell_from
+def create_move(color, move_string):
+    from_cell = ""
+    to_cell = ""
+    if len(move_string) >4:
+        from_cell = move_string[0:2]
+        to_cell = move_string[2:4];
+        CM = CMove(color, from_cell, to_cell, True);
+        CM.trans_to = '1'
+        return CM
+    elif len(move_string) >3:
+        from_cell = move_string[0:2]
+        to_cell = move_string[2:4];
+        CM = CMove(color, from_cell, to_cell, False);
+        return CM
+    elif len(move_string) >2:
+        return CMove(color,'000')
+    else:
+        return CMove(color,'00')
+

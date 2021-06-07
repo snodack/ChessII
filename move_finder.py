@@ -98,6 +98,7 @@ def find_pawn_moves(player_color, position, rank, file, last_move):
     player_move_direction = -2 * player_color  + 1
     all_pawn_moves = []
     cache_file = file + player_move_direction
+    if cache_file >7 or cache_file<0: return []
     # Ходы вперед
     if position[cache_file][rank] == None:
         if (cache_file)%7 ==0:

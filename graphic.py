@@ -1,6 +1,9 @@
+import time
 import sys, pygame
 import asyncio
 from abc import ABC, abstractmethod
+
+from pygame import display
 
 #Глобальные
 pygame.init()
@@ -11,7 +14,7 @@ green_color = pygame.Color(0,255,0)
 tips_color = pygame.Color(80,80,80)
 transormation_bg_color = pygame.Color(105, 105, 105)
 debug_mode = True # Позволяет играть самим с собой
-size = width, height = 900, 640
+size = width, height = 640, 700
 chess_board_size = 640
 cell_size = chess_board_size / 8
 cell_move_radius = cell_size/4
@@ -174,6 +177,9 @@ async def input_check():
             if event.type == pygame.QUIT: sys.exit()
             elif event.type ==pygame.MOUSEBUTTONUP:
                 handle_click(event.pos)
+        
+        
+
 
 start_position = [["bR","bN","bB","bQ","bK","bB","bN","bR"],
                     ["bP","bP","bP","bP","bP","bP","bP","bP"],
@@ -267,8 +273,6 @@ class transformation_state(state):
             current_state.process(position, file_rank)
 
         pass
-    
-
 
 class graphic_context():
     def __init__(self, core_context):
@@ -277,6 +281,7 @@ class graphic_context():
 def init_context(core_context):
     global current_context
     current_context = graphic_context(core_context)
+
 # Функция перехода в другое состояние
 def transition_to(new_state: state):
     global current_state
