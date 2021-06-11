@@ -100,6 +100,8 @@ class CMove:
         else:
             return self.cell_from
 def create_move(color, move_string):
+    if move_string == "":
+        return None
     from_cell = ""
     to_cell = ""
     if len(move_string) >4:

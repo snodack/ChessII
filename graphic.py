@@ -13,8 +13,8 @@ black_color = pygame.Color(65,25,0)
 green_color = pygame.Color(0,255,0)
 tips_color = pygame.Color(80,80,80)
 transormation_bg_color = pygame.Color(105, 105, 105)
-debug_mode = True # Позволяет играть самим с собой
-size = width, height = 640, 700
+debug_mode = False # Позволяет играть самим с собой
+size = width, height = 640, 640
 chess_board_size = 640
 cell_size = chess_board_size / 8
 cell_move_radius = cell_size/4
@@ -31,6 +31,7 @@ files = [i for i in range(1,9)]
 current_context = None #Для обратной связи
 font_size = 20
 font = pygame.font.SysFont('didot.ttc', font_size)
+
 
 chessmen = {
     "bP": pygame.image.load("./resources/alpha/bP.png"),
@@ -145,6 +146,7 @@ def draw_figure_moves():
             cell_move_radius, width = 0)
     pygame.display.flip()
 
+
 def show_moves(file_rank):
     global current_available_cells
     #обычные фигуры 
@@ -230,7 +232,7 @@ class figure_state(state):
                 # Передать ход в core
                 current_context.core.player_make_move(i)
                 # Переход к состоянию enemy_state
-                if debug_mode:
+                if True:
                     transition_to(default_state())
                 else:
                     transition_to(enemy_state())
@@ -263,7 +265,7 @@ class transformation_state(state):
                     trans_figures = ['1', '2', '3', '4']
                     self.expected_move.trans_to_figure(trans_figures[i])
                     current_context.core.player_make_move(self.expected_move)
-                    if debug_mode:
+                    if True:
                         transition_to(default_state())
                     else:
                         transition_to(enemy_state())

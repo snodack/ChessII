@@ -1,6 +1,6 @@
 from tkinter import *
 from tkinter import ttk
-from core import start
+
 
 window = Tk()  
 window.title("Дипломная работа Григорьев Е.О. ПРО-116")  
@@ -17,16 +17,20 @@ depth =ttk.Combobox(window,
                                     4,
                                     5,
                                     6,
-                                    7,
-                                    8,
-                                    9,])
-depth.current(4)
+                            ])
+depth.current(3)
 depth.pack()
 
 def start_white_game():
+    from core import start
     a = depth.current()+1
     window.destroy()
     start(True, a)
+def start_black_game():
+    from core import start
+    a = depth.current()+1
+    window.destroy()
+    start(False, a)
     
 button = Button(
     text="Черный",
@@ -34,6 +38,7 @@ button = Button(
     height=5,
     bg="black",
     fg="white",
+    command=start_black_game
 )
 button2 = Button(
     text="Белый",

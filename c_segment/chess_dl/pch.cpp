@@ -190,6 +190,7 @@ string evaluate_root(GamePos position, int depth = 5) {
             vector<string> moves = find_chess_move(position.color, position.position, i, j, position.castling.second, "-");
             for (int move_i = 0; move_i < moves.size(); move_i++) {
                 GamePos new_pos = make_move(position, moves[move_i]);
+                if (!check_shah(new_pos) or (moves[move_i].length() < 4 and !check_castling_shah(position, moves[move_i]))) continue;
                 new_pos.change_color();
                 float eval = evaluate(new_pos, depth - 1, -10001, 10001);
                 if ((position.color and eval > best_move_eval) or (!position.color and eval < best_move_eval)) {
@@ -218,7 +219,7 @@ float evaluate(GamePos position, int depth, float alpha, float beta) {
                 for (int move_i = 0; move_i < moves.size(); move_i++) {
                     GamePos new_pos = make_move(position, moves[move_i]);
                     //Проверка на недопустимость хода
-                    if (!check_shah(new_pos) or (moves[move_i].length() < 3 and !check_castling_shah(position, moves[move_i]))) continue;
+                    if (!check_shah(new_pos) or (moves[move_i].length() < 4 and !check_castling_shah(position, moves[move_i]))) continue;
                     new_pos.change_color();
                     best_move = max(best_move, evaluate(new_pos, depth - 1, alpha, beta));
                     alpha = max(alpha, best_move);
@@ -230,7 +231,7 @@ float evaluate(GamePos position, int depth, float alpha, float beta) {
                 for (int move_i = 0; move_i < moves.size(); move_i++) {
                     GamePos new_pos = make_move(position, moves[move_i]);
                     //Проверка на недопустимость хода
-                    if (!check_shah(new_pos) or (moves[move_i].length() < 3 and !check_castling_shah(position, moves[move_i]))) continue;
+                    if (!check_shah(new_pos) or (moves[move_i].length() < 4 and !check_castling_shah(position, moves[move_i]))) continue;
                     new_pos.change_color();
                     best_move = min(best_move, evaluate(new_pos, depth - 1, alpha, beta));
                     beta = min(beta, best_move);

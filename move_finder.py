@@ -244,6 +244,14 @@ def check_shah(position, player_color):
             cache_pos = position[figure_posit[0]][figure_posit[1]]
             if cache_pos == oponent_color_char + 'N':
                 return False
+
+    signs = [[-1, -1], [-1, 0], [-1, 1], [0, -1], [0, 1], [1, -1], [1, 0], [1, 1]]
+    for i in signs:
+        figure_posit = [king_position[0] + i[0], king_position[1] + i[1]]
+        if (0 <=figure_posit[0] <=7 and 0 <=figure_posit[1] <=7):
+            cache_pos = position[figure_posit[0]][figure_posit[1]]
+            if cache_pos == oponent_color_char + 'K':
+                return False
     return True
 
 def find_moves(position, player_color, player_castl, last_move):
@@ -329,7 +337,7 @@ def make_move(global_position, i_move, current_player_color, players_castling, l
         king_file = (int)(7 - 7 * (not current_player_color))
         #Проверяем нет ли шахов по пути на рокировку
         position[king_file][4], position[king_file][2] = None , position[king_file][4]
-        position[king_file][3], position[king_file][0] = position[king_file][7], None
+        position[king_file][3], position[king_file][0] = position[king_file][0], None
         castling[current_player_color] = (False, False)
     #Короткая рокировка "00"
     else:
